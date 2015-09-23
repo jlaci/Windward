@@ -1,17 +1,30 @@
 package view
 
-import java.awt.{Color, Polygon}
+import java.awt._
 
-import scala.swing.{Graphics2D, Panel}
+import scala.swing.Graphics2D
+import scala.swing.event.UIElementResized
+import scala.swing.{GridPanel, UIElement, Graphics2D, Panel}
 
 /**
  * Created by jlaci on 2015. 09. 18..
  */
-class ViewPanel(var windData : Array[Array[(Color, Int)]]) extends Panel {
+class SimulationViewPanel(var windData : Array[Array[(Color, Int)]]) extends Panel {
+
+
 
   override def paintComponent(g: Graphics2D) {
-    val dx = g.getClipBounds.width.toFloat  / windData.length
-    val dy = g.getClipBounds.height.toFloat / windData.map(_.length).max
+
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON);
+    g.setRenderingHint(RenderingHints.KEY_RENDERING,
+      RenderingHints.VALUE_RENDER_QUALITY);
+
+    val minDimension = Math.min(g.getClipBounds.width.toFloat, g.getClipBounds.height.toFloat);
+
+    val dx = minDimension / windData.length
+    val dy = minDimension / windData.map(_.length).max
+
     for {
       x <- 0 until windData.length
       y <- 0 until windData(x).length
@@ -56,7 +69,6 @@ class ViewPanel(var windData : Array[Array[(Color, Int)]]) extends Panel {
     polygon.addPoint((len - WIND_INDICATOR_ARROW_SIZE).toInt, WIND_INDICATOR_ARROW_SIZE.toInt);
     polygon.addPoint(len.toInt, 0);
     g.fillPolygon(polygon);
-
     g.setTransform(oldTransform);
   }
 

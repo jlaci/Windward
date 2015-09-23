@@ -18,8 +18,5 @@ object Application {
     val window : ViewWindow = new ViewWindow(world);
     window.visible = true;
 
-    while(true) {
-      window.dataChanged();
-    }
   }
 }
