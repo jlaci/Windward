@@ -10,10 +10,10 @@ object Application {
   def main(args : Array[String]) : Unit = {
     println("Windward starting.")
 
-    val world = WorldBuilder.createEmptyWorld(64, 64);
+    val world = WorldBuilder.createEmptyWorld(32, 32);
     //WeatherGenerator.initUniformWind(world, 0, 6);
-    WeatherGenerator.initRandomWind(world, 6, 30);
-
+    //WeatherGenerator.initRandomWind(world, 6, 30);
+    WeatherGenerator.initGradientWind(world, 45, 300);
 
     val window : ViewWindow = new ViewWindow(world);
     window.visible = true;
