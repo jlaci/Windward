@@ -3,9 +3,9 @@ package view
 import java.awt.Color
 import javax.swing.{BorderFactory, JFrame}
 
+import physical.Simulator
 import physical.world.World
 
-import scala.swing
 import scala.swing.GridBagPanel.Fill
 import scala.swing._
 
@@ -13,7 +13,7 @@ import scala.swing._
 /**
  * Created by jlaci on 2015. 09. 18..
  */
-class ViewWindow (world : World) extends MainFrame{
+class ViewWindow extends MainFrame{
 
 	contents = new GridBagPanel {
     val cw = new Constraints();
@@ -50,7 +50,7 @@ class ViewWindow (world : World) extends MainFrame{
 
 
 				//The actual view panel
-				val simViewPanel = new SimulationViewPanel(convertData(world, 0, 0, 32)) {
+				val simViewPanel = new SimulationViewPanel(convertData(Simulator.world, 0, 0, 32)) {
 					preferredSize = new swing.Dimension(750, 750)
 				}
 				cs.fill = Fill.Both;

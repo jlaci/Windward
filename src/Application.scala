@@ -1,5 +1,4 @@
-import physical.WorldBuilder
-import physical.weather.WeatherGenerator
+import physical.Simulator
 import view.ViewWindow
 
 /**
@@ -9,14 +8,12 @@ object Application {
 
   def main(args : Array[String]) : Unit = {
     println("Windward starting.")
+    Simulator.init();
 
-    val world = WorldBuilder.createEmptyWorld(32, 32);
-    //WeatherGenerator.initUniformWind(world, 0, 6);
-    //WeatherGenerator.initRandomWind(world, 6, 30);
-    WeatherGenerator.initGradientWind(world, 45, 300);
-
-    val window : ViewWindow = new ViewWindow(world);
+    val window : ViewWindow = new ViewWindow();
     window.visible = true;
+
+    Simulator.start();
 
   }
 }
