@@ -60,12 +60,12 @@ class ViewWindow extends MainFrame {
 
                     val timeStepTF = new TextField() {
                         columns = 10
-                        text = simViewPanel.viewSimStep + " / " + Simulator.SIM_END_TIME / Simulator.SIM_TIME_STEP
+                        text = simViewPanel.viewSimStep + " / " + Simulator.simulationParameters.endTime
                     }
 
                     def simStepChanged = {
                         simViewPanel.repaint()
-                        timeStepTF.text = simViewPanel.viewSimStep + " / " + Simulator.SIM_END_TIME / Simulator.SIM_TIME_STEP
+                        timeStepTF.text = simViewPanel.viewSimStep + " / " + Simulator.simulationParameters.endTime
                     }
 
                     contents += new Button {
@@ -84,8 +84,8 @@ class ViewWindow extends MainFrame {
                         text = "<"
                         reactions += {
                             case ButtonClicked(_) => {
-                                if (simViewPanel.viewSimStep - Simulator.SIM_TIME_STEP >= 0) {
-                                    simViewPanel.viewSimStep -= Simulator.SIM_TIME_STEP;
+                                if (simViewPanel.viewSimStep > 0) {
+                                    simViewPanel.viewSimStep -= 1;
                                     simStepChanged
                                 }
                             };
@@ -94,8 +94,8 @@ class ViewWindow extends MainFrame {
                         text = ">"
                         reactions += {
                             case ButtonClicked(_) => {
-                                if (simViewPanel.viewSimStep + Simulator.SIM_TIME_STEP <= Simulator.SIM_END_TIME) {
-                                    simViewPanel.viewSimStep += Simulator.SIM_TIME_STEP;
+                                if (simViewPanel.viewSimStep < Simulator.simulationParameters.endTime) {
+                                    simViewPanel.viewSimStep += 1;
                                     simStepChanged
                                 }
                             };
@@ -104,7 +104,7 @@ class ViewWindow extends MainFrame {
                         text = "Jump to end"
                         reactions += {
                             case ButtonClicked(_) => {
-                                simViewPanel.viewSimStep = Simulator.SIM_END_TIME / Simulator.SIM_TIME_STEP;
+                                simViewPanel.viewSimStep = Simulator.simulationParameters.endTime;
                                 simStepChanged
                             };
                         }

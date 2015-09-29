@@ -1,7 +1,9 @@
 package windward.simulation
 
+import windward.simulation.logical.LogicalSimulator
 import windward.simulation.physical.{PhysicalSimulator, WorldBuilder}
 import windward.simulation.physical.world.World
+import windward.simulation.units.SimulationUnits
 
 
 /**
@@ -11,12 +13,12 @@ object Simulator {
 
     var simTime: Int = 0;
 
-    val SIM_TIME_STEP = 1;
-    val SIM_END_TIME = 100;
-
-    val worldState: Array[World] = new Array[World](SIM_END_TIME / SIM_TIME_STEP + 1);
+    var worldState: Array[World] = null;
+    var simulationParameters : SimulationParameters = null;
 
     def init(parameters: SimulationParameters): Unit = {
+        simulationParameters = parameters;
+        worldState = new Array[World](parameters.endTime + 1)
         worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 45, 300);
         //WeatherGenerator.initUniformWind(world, 0, 6);
         //WeatherGenerator.initRandomWind(world, 6, 30);
@@ -24,14 +26,15 @@ object Simulator {
 
     def start(): Unit = {
         println("Starting simulation")
-        while (simTime + SIM_TIME_STEP <= SIM_END_TIME) {
+        while (simTime < simulationParameters.endTime) {
             step()
-            simTime += SIM_TIME_STEP
+            simTime += 1;
         }
     }
 
     def step(): Unit = {
-        println("Simulation step " + simTime / SIM_TIME_STEP + " time: " + simTime)
-        worldState((simTime + SIM_TIME_STEP) / SIM_TIME_STEP) = PhysicalSimulator.step(worldState(simTime / SIM_TIME_STEP));
+        println("Simulation step " + simTime + " time: " + (simTime * SimulationUnits.timeStepInMilliseconds / 1000) + "s")
+        worldState(simTime + 1) = PhysicalSimulator.step(worldState(simTime));
+        LogicalSimulator.step();
     }
 }

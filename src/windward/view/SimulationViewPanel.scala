@@ -108,13 +108,13 @@ class SimulationViewPanel(x: Int, y: Int, size: Int) extends Panel {
         val result: Array[Array[(Color, Int)]] = new Array[Array[(Color, Int)]](size);
 
         var viewX = x;
-        if ((Simulator.worldState(viewSimStep).cells.length - 1) < (x + size)) {
-            viewX = Simulator.worldState(viewSimStep).cells.length - size;
+        if ((Simulator.worldState(viewSimStep).width.toCellUnit.toInt) < (x + size)) {
+            viewX = Math.max(Simulator.worldState(viewSimStep).width.toCellUnit.toInt - size, 0);
         }
 
         var viewY = y;
-        if ((Simulator.worldState(viewSimStep).cells(0).length - 1) < (y + size)) {
-            viewY = Simulator.worldState(viewSimStep).cells(0).length - size;
+        if ((Simulator.worldState(viewSimStep).height.toCellUnit.toInt) < (y + size)) {
+            viewY = Math.max(Simulator.worldState(viewSimStep).height.toCellUnit.toInt - size, 0);
         }
 
         for (rowIndex <- viewX until (viewX + size)) {
