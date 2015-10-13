@@ -9,13 +9,13 @@ import scala.swing.{Graphics2D, Panel}
 /**
  * Created by jlaci on 2015. 09. 18..
  */
-class SimulationViewPanel(x: Int, y: Int, size: Int) extends Panel {
+class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Panel {
 
     var viewSimStep: Int = 0;
 
     override def paintComponent(g: Graphics2D) {
 
-        val windData = getWindData(x, y, 32);
+        val windData = getWindData(x, y, viewSize);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
             RenderingHints.VALUE_ANTIALIAS_ON);

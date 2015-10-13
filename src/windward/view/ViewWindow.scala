@@ -3,16 +3,29 @@ package windward.view
 import javax.swing.{BorderFactory, JFrame}
 
 import windward.simulation.Simulator
+import windward.simulation.units.SimUnit
 
 import scala.swing.GridBagPanel.Fill
 import scala.swing._
-import scala.swing.event.ButtonClicked
+import scala.swing.event.{ButtonClicked, Key, KeyPressed}
 
 
 /**
  * Created by jlaci on 2015. 09. 18..
  */
 class ViewWindow extends MainFrame {
+
+    var simViewPanel : SimulationViewPanel = null;
+    var xCoordTF : TextField = null;
+    var yCoordTF : TextField = null;
+    var sizeTF : TextField = null;
+
+
+    def viewDataChanged = {
+        xCoordTF.text = "X : " + simViewPanel.x
+        yCoordTF.text = "Y : " + simViewPanel.y
+        sizeTF.text = "S: " + simViewPanel.viewSize
+    }
 
     contents = new GridBagPanel {
         val cw = new Constraints();
@@ -48,11 +61,32 @@ class ViewWindow extends MainFrame {
                 cs.weighty = 0.1
 
                 //The actual view panel
-                val simViewPanel = new SimulationViewPanel(0, 0, 32) {
+                simViewPanel = new SimulationViewPanel(0, 0, 16) {
                     preferredSize = new swing.Dimension(750, 750)
                 }
                 cs.fill = Fill.Both;
                 layout(simViewPanel) = cs;
+
+                //Data about the sim view panel
+                val simViewDataPanel = new FlowPanel() {
+                    xCoordTF = new TextField() {
+                        columns = 5
+                        text = "X : " + simViewPanel.x
+                    }
+
+                    yCoordTF = new TextField() {
+                        columns = 5
+                        text = "Y : " + simViewPanel.y
+                    }
+
+                    sizeTF = new TextField() {
+                        columns = 5
+                        text = "S: " + simViewPanel.viewSize
+                    }
+
+                    contents += xCoordTF += yCoordTF += sizeTF;
+                }
+                layout(simViewDataPanel) = cs;
 
                 //The simulation timeline control panel
                 val simTimelinePanel = new FlowPanel() {
@@ -133,10 +167,49 @@ class ViewWindow extends MainFrame {
         cw.fill = Fill.Both;
         cw.gridy = 1;
         layout(mainPanel) = cw;
+
+        //Event listeners
+        listenTo(keys)
+        reactions += {
+            case KeyPressed(_, Key.Up, _, _) => {
+                println("UP");
+                if (simViewPanel.y > 0) {
+                    simViewPanel.y -= 1;
+                    viewDataChanged
+                    repaint()
+                }
+            }
+            case KeyPressed(_, Key.Left, _, _) => {
+                if(simViewPanel.x > 0) {
+                    simViewPanel.x -= 1;
+                    viewDataChanged
+                    repaint()
+                }
+            }
+            case KeyPressed(_, Key.Down, _, _) => {
+                if(simViewPanel.y < new SimUnit(Simulator.simulationParameters.worldHeight).toCellUnit().toInt() - simViewPanel.viewSize) {
+                    simViewPanel.y += 1;
+                    viewDataChanged
+                    repaint()
+                }
+            }
+            case KeyPressed(_, Key.Right, _, _) => {
+                if(simViewPanel.x < new SimUnit(Simulator.simulationParameters.worldWidth).toCellUnit().toInt() - simViewPanel.viewSize) {
+                    simViewPanel.x += 1;
+                    viewDataChanged
+                    repaint()
+                }
+            }
+        }
+        focusable = true
+        requestFocus
+
     }
 
     size = new Dimension(1280, 960);
     resizable = false;
     peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+
 
 }
