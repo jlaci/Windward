@@ -1,4 +1,4 @@
-package windward.simulation.logical.actors.sailing
+package windward.simulation.logical.domain.sailing.polar
 
 /**
  * Created by jlaci on 2015. 10. 13..

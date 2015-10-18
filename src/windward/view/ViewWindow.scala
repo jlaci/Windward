@@ -84,7 +84,8 @@ class ViewWindow extends MainFrame {
                         text = "S: " + simViewPanel.viewSize
                     }
 
-                    contents += xCoordTF += yCoordTF += sizeTF;
+                    contents += xCoordTF += yCoordTF += sizeTF
+
                 }
                 layout(simViewDataPanel) = cs;
 
@@ -196,6 +197,20 @@ class ViewWindow extends MainFrame {
             case KeyPressed(_, Key.Right, _, _) => {
                 if(simViewPanel.x < new SimUnit(Simulator.simulationParameters.worldWidth).toCellUnit().toInt() - simViewPanel.viewSize) {
                     simViewPanel.x += 1;
+                    viewDataChanged
+                    repaint()
+                }
+            }
+            case KeyPressed(_, Key.Subtract, _, _) => {
+                if(simViewPanel.viewSize < Math.min(32, Math.max(new SimUnit(Simulator.simulationParameters.worldWidth).toCellUnit().toInt(), new SimUnit(Simulator.simulationParameters.worldHeight).toCellUnit().toInt()))) {
+                    simViewPanel.viewSize += 1;
+                    viewDataChanged
+                    repaint()
+                }
+            }
+            case KeyPressed(_, Key.Add, _, _) => {
+                if(simViewPanel.viewSize > 1) {
+                    simViewPanel.viewSize -= 1;
                     viewDataChanged
                     repaint()
                 }

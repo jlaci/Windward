@@ -3,7 +3,10 @@ package windward.view
 import java.awt._
 
 import windward.simulation.Simulator
+import windward.simulation.logical.domain.sailing.Sailboat
+import windward.simulation.units.SimulationUnits
 
+import scala.collection.mutable
 import scala.swing.{Graphics2D, Panel}
 
 /**
@@ -16,6 +19,7 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
     override def paintComponent(g: Graphics2D) {
 
         val windData = getWindData(x, y, viewSize);
+        val sailboats = getSailboats(x, y, viewSize);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
             RenderingHints.VALUE_ANTIALIAS_ON);
@@ -38,6 +42,18 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
             drawWindPower(x1, y1, x2, y2, g, windData(x)(y) _1);
             drawWindDirection(x1, y1, x2, y2, g, windData(x)(y) _2);
         }
+
+        for (sailboat <- sailboats) {
+            drawSailboat(sailboat, g);
+        }
+
+    }
+
+    def drawSailboat(sailboat: Sailboat, g : Graphics2D): Unit = {
+        val minDimension = Math.min(g.getClipBounds.width.toFloat, g.getClipBounds.height.toFloat);
+
+        g.setColor(Color.cyan)
+        g.fillRect(sailboat.posX.toCellUnit().toInt(), sailboat.posY.toCellUnit().toInt(), 20, 20);
     }
 
     def drawWindPower(x1: Int, y1: Int, x2: Int, y2: Int, g: Graphics2D, color: Color): Unit = {
@@ -128,9 +144,22 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
         result;
     }
 
+    private def getSailboats(x: Int, y: Int, size: Int) : Array[Sailboat] = {
+        val result = mutable.MutableList[Sailboat]();
+
+        for(sailboat <- Simulator.sailboats(viewSimStep)) {
+            val sailboatX = sailboat.posX.toCellUnit().toInt();
+            val sailboatY = sailboat.posY.toCellUnit().toInt();
+
+            if(sailboatX >= x && sailboatX < (x + size) && sailboatY >= y && sailboatY < (y + size)) {
+                result += sailboat;
+            }
+        }
+
+        result.toArray
+    }
+
     private def calculateColor(windSpeed: Int): Color = {
-        //new Color(Math.min(windSpeed,255), Math.min(windSpeed,255), Math.min(windSpeed,255));
-        //Windspeed is valid from 0 to 300
-        Color.getHSBColor(windSpeed / 300f, 0.5f, 1);
+        Color.getHSBColor(windSpeed / SimulationUnits.maxWindSpeed, 0.5f, 1);
     }
 }

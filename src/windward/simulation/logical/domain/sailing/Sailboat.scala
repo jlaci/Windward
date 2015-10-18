@@ -1,6 +1,7 @@
-package windward.simulation.logical.actors.sailing
+package windward.simulation.logical.domain.sailing
 
-import windward.simulation.logical.actors.Actor
+import windward.simulation.logical.Actor
+import windward.simulation.logical.domain.sailing.sail.Sail
 import windward.simulation.physical.effects.CellEffect
 import windward.simulation.physical.world.World
 import windward.simulation.units.SimUnit

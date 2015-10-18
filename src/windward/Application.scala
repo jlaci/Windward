@@ -1,5 +1,6 @@
 package windward
 
+import windward.simulation.units.SimUnit
 import windward.simulation.{SimulationParameters, Simulator}
 import windward.view.ViewWindow
 
@@ -12,7 +13,7 @@ object Application {
     def main(args: Array[String]): Unit = {
         println("Windward starting.")
 
-        val params = new SimulationParameters(100, 128, 128);
+        val params = new SimulationParameters(100, new SimUnit(128), new SimUnit(128));
         Simulator.init(params);
 
         val window: ViewWindow = new ViewWindow();

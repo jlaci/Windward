@@ -9,5 +9,6 @@ object SimulationUnits {
     var tileSizeInSimUnits : Float = 4f;
     var timeStepInMilliseconds : Int = 1000;
     var windSpeedInMeterPerSec = 0.1f;
+    var maxWindSpeed = 300f;
 
 }

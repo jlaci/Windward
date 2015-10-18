@@ -1,4 +1,4 @@
-package windward.simulation.logical.actors
+package windward.simulation.logical
 
 import windward.simulation.physical.effects.CellEffect
 import windward.simulation.physical.world.World
