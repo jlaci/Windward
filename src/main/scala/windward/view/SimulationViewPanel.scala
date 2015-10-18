@@ -56,7 +56,7 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
         val oneSimUnitOnScreen = oneCellUnitOnScreen / SimulationUnits.tileSizeInSimUnits;
 
         g.setColor(Color.cyan)
-        val width = sailboat.length.toInt() * oneSimUnitOnScreen;
+        val width = sailboat.params.length.toInt() * oneSimUnitOnScreen;
         val length =  (width / 2).toInt;
 
         val oldTransform = g.getTransform;
