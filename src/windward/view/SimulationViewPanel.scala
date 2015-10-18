@@ -3,6 +3,7 @@ package windward.view
 import java.awt._
 
 import windward.simulation.Simulator
+import windward.simulation.logical.Actor
 import windward.simulation.logical.domain.sailing.Sailboat
 import windward.simulation.units.SimulationUnits
 
@@ -52,12 +53,25 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
     def drawSailboat(sailboat: Sailboat, g : Graphics2D): Unit = {
         val minDimension = Math.min(g.getClipBounds.width.toFloat, g.getClipBounds.height.toFloat);
         val oneCellUnitOnScreen = minDimension / viewSize;
+        val oneSimUnitOnScreen = oneCellUnitOnScreen / SimulationUnits.tileSizeInSimUnits;
 
         g.setColor(Color.cyan)
-        val width = sailboat.length.toCellUnit().toInt() * oneCellUnitOnScreen;
-        val height =  (sailboat.length.toCellUnit().toInt()/2) * oneCellUnitOnScreen;
+        val width = sailboat.length.toInt() * oneSimUnitOnScreen;
+        val length =  (width / 2).toInt;
 
-        g.fillRect(sailboat.posX.toCellUnit().toInt(), sailboat.posY.toCellUnit().toInt(),  width.toInt, height.toInt);
+        val oldTransform = g.getTransform;
+        val angle = Math.toRadians(sailboat.heading);
+        val at = java.awt.geom.AffineTransform.getTranslateInstance(sailboat.posX.toInt * oneSimUnitOnScreen, sailboat.posY.toInt * oneSimUnitOnScreen);
+
+        at.concatenate(java.awt.geom.AffineTransform.getRotateInstance(angle));
+        g.transform(at);
+        val polygon = new Polygon();
+        polygon.addPoint(((sailboat.posX.toInt() * oneSimUnitOnScreen) - length/2).toInt, (sailboat.posY.toInt() * oneSimUnitOnScreen + width/2).toInt);
+        polygon.addPoint(((sailboat.posX.toInt() * oneSimUnitOnScreen) + length/2).toInt, (sailboat.posY.toInt() * oneSimUnitOnScreen + width/2).toInt);
+        polygon.addPoint((sailboat.posX.toInt() * oneSimUnitOnScreen).toInt, (sailboat.posY.toInt() * oneSimUnitOnScreen - width/2).toInt);
+
+        g.fillPolygon(polygon);
+        g.setTransform(oldTransform);
     }
 
     def drawWindPower(x1: Int, y1: Int, x2: Int, y2: Int, g: Graphics2D, color: Color): Unit = {
@@ -113,12 +127,14 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
         val ox2 = cx2 - xOffset;
         val oy2 = cy2 - yOffset;
 
-        //Rotate and scale
-        val x1 = (ox1 * Math.cos(windDirection) - oy1 * Math.sin(windDirection)) * WIND_INDICATOR_SIZE;
-        val y1 = (ox1 * Math.sin(windDirection) + oy1 * Math.cos(windDirection)) * WIND_INDICATOR_SIZE;
+        val windDirectionRad = Math.toRadians(windDirection + 90);
 
-        val x2 = (ox2 * Math.cos(windDirection) - oy2 * Math.sin(windDirection)) * WIND_INDICATOR_SIZE;
-        val y2 = (ox2 * Math.sin(windDirection) + oy2 * Math.cos(windDirection)) * WIND_INDICATOR_SIZE;
+        //Rotate and scale
+        val x1 = (ox1 * Math.cos(windDirectionRad) - oy1 * Math.sin(windDirectionRad)) * WIND_INDICATOR_SIZE;
+        val y1 = (ox1 * Math.sin(windDirectionRad) + oy1 * Math.cos(windDirectionRad)) * WIND_INDICATOR_SIZE;
+
+        val x2 = (ox2 * Math.cos(windDirectionRad) - oy2 * Math.sin(windDirectionRad)) * WIND_INDICATOR_SIZE;
+        val y2 = (ox2 * Math.sin(windDirectionRad) + oy2 * Math.cos(windDirectionRad)) * WIND_INDICATOR_SIZE;
 
         //Transform back and return
         ((x1 + xOffset).toInt, (y1 + yOffset).toInt, (x2 + xOffset).toInt, (y2 + yOffset).toInt);
@@ -152,8 +168,8 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
         val result = mutable.MutableList[Sailboat]();
 
         for(sailboat <- Simulator.sailboats(viewSimStep)) {
-            val sailboatX = sailboat.posX.toCellUnit().toInt();
-            val sailboatY = sailboat.posY.toCellUnit().toInt();
+            val sailboatX = sailboat.position.x.toCellUnit().toInt();
+            val sailboatY = sailboat.position.y.toCellUnit().toInt();
 
             if(sailboatX >= x && sailboatX < (x + size) && sailboatY >= y && sailboatY < (y + size)) {
                 result += sailboat;

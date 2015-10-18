@@ -9,6 +9,10 @@ class CellUnit(val value : Int) extends AnyVal {
         value
     }
 
+    def toSimUnit() : SimUnit = {
+        new SimUnit((SimulationUnits.tileSizeInSimUnits * value).toInt)
+    }
+
     def +(x : CellUnit) : CellUnit = {
         new CellUnit(value + x.value)
     }

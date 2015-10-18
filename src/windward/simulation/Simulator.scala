@@ -1,6 +1,6 @@
 package windward.simulation
 
-import windward.simulation.logical.LogicalSimulator
+import windward.simulation.logical.{Actor, LogicalSimulator}
 import windward.simulation.logical.domain.sailing.{SailboatGenerator, Sailboat}
 import windward.simulation.physical.{PhysicalSimulator, WorldBuilder}
 import windward.simulation.physical.world.World
@@ -21,11 +21,11 @@ object Simulator {
     def init(parameters: SimulationParameters): Unit = {
         simulationParameters = parameters;
         worldState = new Array[World](parameters.endTime + 1)
-        worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 45, 300);
+        worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 315, 300);
 
         sailboats = new Array[Array[Sailboat]](parameters.endTime + 1)
         sailboats(0) = new Array[Sailboat](1);
-        sailboats(0)(0) = SailboatGenerator.getTestSailboat(new SimUnit(0), new SimUnit(0), 0)
+        sailboats(0)(0) = SailboatGenerator.getTestSailboat(new SimUnit(10), new SimUnit(10), 315)
 
         //WeatherGenerator.initUniformWind(world, 0, 6);
         //WeatherGenerator.initRandomWind(world, 6, 30);
@@ -42,6 +42,6 @@ object Simulator {
     def step(): Unit = {
         println("Simulation step " + simTime + " time: " + (simTime * SimulationUnits.timeStepInMilliseconds / 1000) + "s")
         worldState(simTime + 1) = PhysicalSimulator.step(worldState(simTime));
-        sailboats(simTime + 1) = LogicalSimulator.step(sailboats(simTime));
+        sailboats(simTime + 1) = LogicalSimulator.step(worldState(simTime), sailboats(simTime));
     }
 }
