@@ -188,21 +188,21 @@ class ViewWindow extends MainFrame {
                 }
             }
             case KeyPressed(_, Key.Down, _, _) => {
-                if(simViewPanel.y < new SimUnit(Simulator.simulationParameters.worldHeight).toCellUnit().toInt() - simViewPanel.viewSize) {
+                if(simViewPanel.y < Simulator.simulationParameters.worldHeight.toCellUnit().toInt() - simViewPanel.viewSize) {
                     simViewPanel.y += 1;
                     viewDataChanged
                     repaint()
                 }
             }
             case KeyPressed(_, Key.Right, _, _) => {
-                if(simViewPanel.x < new SimUnit(Simulator.simulationParameters.worldWidth).toCellUnit().toInt() - simViewPanel.viewSize) {
+                if(simViewPanel.x < Simulator.simulationParameters.worldWidth.toCellUnit().toInt() - simViewPanel.viewSize) {
                     simViewPanel.x += 1;
                     viewDataChanged
                     repaint()
                 }
             }
             case KeyPressed(_, Key.Subtract, _, _) => {
-                if(simViewPanel.viewSize < Math.min(32, Math.max(new SimUnit(Simulator.simulationParameters.worldWidth).toCellUnit().toInt(), new SimUnit(Simulator.simulationParameters.worldHeight).toCellUnit().toInt()))) {
+                if(simViewPanel.viewSize < Math.min(32, Math.max(Simulator.simulationParameters.worldWidth.toCellUnit().toInt(), Simulator.simulationParameters.worldHeight.toCellUnit().toInt()))) {
                     simViewPanel.viewSize += 1;
                     viewDataChanged
                     repaint()

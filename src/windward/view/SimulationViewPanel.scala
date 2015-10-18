@@ -51,9 +51,13 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
 
     def drawSailboat(sailboat: Sailboat, g : Graphics2D): Unit = {
         val minDimension = Math.min(g.getClipBounds.width.toFloat, g.getClipBounds.height.toFloat);
+        val oneCellUnitOnScreen = minDimension / viewSize;
 
         g.setColor(Color.cyan)
-        g.fillRect(sailboat.posX.toCellUnit().toInt(), sailboat.posY.toCellUnit().toInt(), 20, 20);
+        val width = sailboat.length.toCellUnit().toInt() * oneCellUnitOnScreen;
+        val height =  (sailboat.length.toCellUnit().toInt()/2) * oneCellUnitOnScreen;
+
+        g.fillRect(sailboat.posX.toCellUnit().toInt(), sailboat.posY.toCellUnit().toInt(),  width.toInt, height.toInt);
     }
 
     def drawWindPower(x1: Int, y1: Int, x2: Int, y2: Int, g: Graphics2D, color: Color): Unit = {

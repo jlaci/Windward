@@ -11,8 +11,8 @@ import windward.simulation.units.SimUnit
  */
 class Sailboat(val posX: SimUnit,
                val posY : SimUnit,
-               val length : Int,
-               val height : Int,
+               val length : SimUnit,
+               val height : SimUnit,
                val heading : Int,
                val speed : Int,
                val sails : Array[Sail]) extends Actor(posX.toInt, posY.toInt) {
