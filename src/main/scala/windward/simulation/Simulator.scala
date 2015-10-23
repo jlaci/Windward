@@ -25,7 +25,7 @@ object Simulator {
 
         sailboats = new Array[Array[Sailboat]](parameters.endTime + 1)
         sailboats(0) = new Array[Sailboat](1);
-        sailboats(0)(0) = SailboatGenerator.getTestSailboat(new SimUnit(10), new SimUnit(10), 315)
+        sailboats(0)(0) = SailboatGenerator.getTestSailboat(new SimUnit(512), new SimUnit(512), 45, parameters.worldWidth, parameters.worldHeight)
 
         //WeatherGenerator.initUniformWind(world, 0, 6);
         //WeatherGenerator.initRandomWind(world, 6, 30);

@@ -1,9 +1,12 @@
 package windward.view
 
-import javax.swing.{BorderFactory, JFrame}
+import java.awt.event.{FocusEvent, FocusListener}
+import java.text.DecimalFormat
+import javax.swing.SpringLayout.Constraints
+import javax.swing.{JLabel, BorderFactory, JFrame}
 
 import windward.simulation.Simulator
-import windward.simulation.units.SimUnit
+import windward.simulation.physical.{PhysicsUtility, PhysicalSimulator}
 
 import scala.swing.GridBagPanel.Fill
 import scala.swing._
@@ -16,16 +19,25 @@ import scala.swing.event.{ButtonClicked, Key, KeyPressed}
 class ViewWindow extends MainFrame {
 
     var simViewPanel : SimulationViewPanel = null;
-    var xCoordTF : TextField = null;
-    var yCoordTF : TextField = null;
-    var sizeTF : TextField = null;
+    var viewXCoordTF : TextField = null;
+    var viewYCoordTF : TextField = null;
+    var viewSizeTF : TextField = null;
 
+    var boatXCoordTF : TextField = null;
+    var boatYCoordTF : TextField = null;
+    var boatSpeedTF : TextField = null;
+    var boatHeadingTF : TextField = null;
+    var boatSailTF : TextField = null;
+    var windSpeedTF : TextField = null;
+    var windDirTF : TextField = null;
 
     def viewDataChanged = {
-        xCoordTF.text = "X : " + simViewPanel.x
-        yCoordTF.text = "Y : " + simViewPanel.y
-        sizeTF.text = "S: " + simViewPanel.viewSize
+        viewXCoordTF.text = "X : " + simViewPanel.x
+        viewYCoordTF.text = "Y : " + simViewPanel.y
+        viewSizeTF.text = "S: " + simViewPanel.viewSize
     }
+
+    val formatter = new DecimalFormat("#.##")
 
     contents = new GridBagPanel {
         val cw = new Constraints();
@@ -61,33 +73,11 @@ class ViewWindow extends MainFrame {
                 cs.weighty = 0.1
 
                 //The actual view panel
-                simViewPanel = new SimulationViewPanel(0, 0, 16) {
+                simViewPanel = new SimulationViewPanel(Simulator.simulationParameters.worldWidth.toCellUnit().toInt() / 2, Simulator.simulationParameters.worldHeight.toCellUnit().toInt() / 2, 16) {
                     preferredSize = new swing.Dimension(750, 750)
                 }
-                cs.fill = Fill.Both;
+                cs.anchor = GridBagPanel.Anchor.Center
                 layout(simViewPanel) = cs;
-
-                //Data about the sim view panel
-                val simViewDataPanel = new FlowPanel() {
-                    xCoordTF = new TextField() {
-                        columns = 5
-                        text = "X : " + simViewPanel.x
-                    }
-
-                    yCoordTF = new TextField() {
-                        columns = 5
-                        text = "Y : " + simViewPanel.y
-                    }
-
-                    sizeTF = new TextField() {
-                        columns = 5
-                        text = "S: " + simViewPanel.viewSize
-                    }
-
-                    contents += xCoordTF += yCoordTF += sizeTF
-
-                }
-                layout(simViewDataPanel) = cs;
 
                 //The simulation timeline control panel
                 val simTimelinePanel = new FlowPanel() {
@@ -101,6 +91,13 @@ class ViewWindow extends MainFrame {
                     def simStepChanged = {
                         simViewPanel.repaint()
                         timeStepTF.text = simViewPanel.viewSimStep + " / " + Simulator.simulationParameters.endTime
+                        boatXCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
+                        boatYCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
+                        boatSpeedTF.text = formatter.format(PhysicsUtility.knotsFromMeterPreSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
+                        boatHeadingTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).heading.toString
+                        boatSailTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
+                        windSpeedTF.text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindSpeed(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))) + " m/s"
+                        windDirTF.text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getRelativeWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))))
                     }
 
                     contents += new Button {
@@ -157,12 +154,199 @@ class ViewWindow extends MainFrame {
             layout(simPanel) = cm;
 
             //The right side of the main window
-            val simMenu = new TabbedPane() {
-                border = BorderFactory.createTitledBorder("Simulation parameters");
+            //Data about the sim view panel
+            val dataPanel = new GridBagPanel() {
+                border = BorderFactory.createTitledBorder("Simulation data");
+
+                val dpc = new Constraints()
+                dpc.anchor = GridBagPanel.Anchor.North
+                dpc.fill = GridBagPanel.Fill.Horizontal
+                dpc.weightx = 1
+     
+                val viewDataPanel = new GridBagPanel() {
+                    border = BorderFactory.createTitledBorder("View");
+
+                    val vdpc = new Constraints()
+                    vdpc.grid = (2, 3)
+                    vdpc.fill = GridBagPanel.Fill.Horizontal
+                    vdpc.weightx = 0.5;
+
+                    //X Coordinate
+                    val xCoordLabel = new Label("View X:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    vdpc.gridx = 0
+                    vdpc.gridy = 0
+                    layout(xCoordLabel) = vdpc
+
+                    viewXCoordTF = new TextField() {
+                        columns = 5
+                        text = simViewPanel.x.toString
+                    }
+                    vdpc.gridx = 1
+                    layout(viewXCoordTF) = vdpc
+
+                    //Y coordinate
+                    val yCoordLabel = new Label("View Y:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    vdpc.gridx = 0
+                    vdpc.gridy = 1
+                    layout(yCoordLabel) = vdpc
+
+                    viewYCoordTF = new TextField() {
+                        columns = 5
+                        text = simViewPanel.y.toString
+                    }
+                    vdpc.gridx = 1
+                    layout(viewYCoordTF) = vdpc
+
+
+                    //Size
+                    val sizeLabel = new Label("View size:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    vdpc.gridx = 0
+                    vdpc.gridy = 2
+                    layout(sizeLabel) = vdpc
+
+                    viewSizeTF = new TextField() {
+                        columns = 5
+                        text = simViewPanel.viewSize.toString
+                    }
+                    vdpc.gridx = 1
+                    layout(viewSizeTF) = vdpc
+                }
+                dpc.gridy = 0
+                layout(viewDataPanel) = dpc
+
+                val boatDataPanel = new GridBagPanel() {
+                    border = BorderFactory.createTitledBorder("Boat");
+
+                    val bdpc = new Constraints()
+                    bdpc.grid = (2, 7)
+                    bdpc.fill = GridBagPanel.Fill.Horizontal
+                    bdpc.weightx = 0.5;
+
+                    //X Coordinate
+                    val xCoordLabel = new Label("Boat X:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 0
+                    layout(xCoordLabel) = bdpc
+
+                    boatXCoordTF = new TextField() {
+                        columns = 5
+                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
+                    }
+                    bdpc.gridx = 1
+                    layout(boatXCoordTF) = bdpc
+
+                    //Y coordinate
+                    val yCoordLabel = new Label("Boat Y:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 1
+                    layout(yCoordLabel) = bdpc
+
+                    boatYCoordTF = new TextField() {
+                        columns = 5
+                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
+                    }
+                    bdpc.gridx = 1
+                    layout(boatYCoordTF) = bdpc
+
+
+                    //Speed
+                    val speedLabel = new Label("Speed:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 2
+                    layout(speedLabel) = bdpc
+
+                    boatSpeedTF = new TextField() {
+                        columns = 5
+                        text = formatter.format(PhysicsUtility.knotsFromMeterPreSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
+                    }
+                    bdpc.gridx = 1
+                    layout(boatSpeedTF) = bdpc
+
+                    //Heading
+                    val headingLabel = new Label("Heading:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 3
+                    layout(headingLabel) = bdpc
+
+                    boatHeadingTF = new TextField() {
+                        columns = 5
+                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).heading.toString
+                    }
+                    bdpc.gridx = 1
+                    layout(boatHeadingTF) = bdpc
+
+                    //Sail
+                    val sailLabel = new Label("Sail:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 4
+                    layout(sailLabel) = bdpc
+
+                    boatSailTF = new TextField() {
+                        columns = 5
+                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
+                    }
+                    bdpc.gridx = 1
+                    layout(boatSailTF) = bdpc
+
+                    //Windspeed
+                    val windSpeedLabel = new Label("Wind speed:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 5
+                    layout(windSpeedLabel) = bdpc
+
+                    windSpeedTF = new TextField() {
+                        columns = 5
+                        text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindSpeed(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))) + " m/s"
+                    }
+                    bdpc.gridx = 1
+                    layout(windSpeedTF) = bdpc
+
+                    //Relative wind direction
+                    val windDirLabel = new Label("Wind direction:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 6
+                    layout(windDirLabel) = bdpc
+
+                    windDirTF = new TextField() {
+                        columns = 5
+                        text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getRelativeWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))))
+                    }
+                    bdpc.gridx = 1
+                    layout(windDirTF) = bdpc
+
+                }
+                dpc.gridy = 1
+                layout(boatDataPanel) = dpc
+
+                val emptySpaceFiller = new Panel {}
+                dpc.fill = GridBagPanel.Fill.Both
+                dpc.gridy = 2
+                dpc.weighty = 100
+                layout(emptySpaceFiller) = dpc
             }
             cm.gridx = 2;
             cm.gridwidth = 1;
-            layout(simMenu) = cm;
+            layout(dataPanel) = cm;
 
         }
         cw.fill = Fill.Both;
@@ -173,7 +357,6 @@ class ViewWindow extends MainFrame {
         listenTo(keys)
         reactions += {
             case KeyPressed(_, Key.Up, _, _) => {
-                println("UP");
                 if (simViewPanel.y > 0) {
                     simViewPanel.y -= 1;
                     viewDataChanged
@@ -219,12 +402,20 @@ class ViewWindow extends MainFrame {
         focusable = true
         requestFocus
 
+        peer.addFocusListener(new FocusListener {
+
+            override def focusGained(e: FocusEvent): Unit = {
+
+            }
+
+            override def focusLost(e: FocusEvent): Unit = {
+                requestFocus()
+            }
+        })
+
     }
 
-    size = new Dimension(1280, 960);
+    size = new Dimension(1080, 960);
     resizable = false;
     peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-
 }

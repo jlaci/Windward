@@ -75,6 +75,10 @@ object WeatherGenerator {
             Math.sqrt(Math.pow(0 - x, 2) + Math.pow(0 - y, 2));
         }
 
+        def isAboveAxis(x: Int, y: Int) = {
+            (x + (height.toCellUnit.toInt - y)) > (width.toCellUnit.toInt + height.toCellUnit.toInt)/2
+        }
+
         val furthestDistance = distance(width.toCellUnit.toInt, height.toCellUnit.toInt);
         val speed: Array[Array[Float]] = new Array[Array[Float]](width.toCellUnit.toInt);
         val direction: Array[Array[Int]] = new Array[Array[Int]](width.toCellUnit.toInt);
@@ -86,7 +90,12 @@ object WeatherGenerator {
             for (colIndex <- 0 until height.toCellUnit.toInt) {
                 val strength = (Math.max(1, distance(rowIndex, colIndex)) / furthestDistance);
 
-                direction(rowIndex)(colIndex) = windDirection;
+                /*if(isAboveAxis(rowIndex, colIndex)) {
+                    direction(rowIndex)(colIndex) = windDirection + 5
+                } else {
+                    direction(rowIndex)(colIndex) = windDirection - 5
+                }*/
+                direction(rowIndex)(colIndex) = windDirection
                 speed(rowIndex)(colIndex) = Math.max(startingSpeed - (strength * startingSpeed), 0).toFloat;
             }
         }

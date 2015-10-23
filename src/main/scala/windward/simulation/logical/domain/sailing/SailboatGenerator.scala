@@ -11,13 +11,13 @@ import windward.simulation.units.{Coordinate, SimUnit, SimulationUnits}
  */
 object SailboatGenerator {
 
-    def getTestSailboat(startPosX : SimUnit, startPosY : SimUnit, startHeading : Int) : Sailboat = {
+    def getTestSailboat(startPosX : SimUnit, startPosY : SimUnit, startHeading : Int, goalX : SimUnit, goalY : SimUnit) : Sailboat = {
         val sails = new Array[Sail](1)
         sails(0) = new Sail(SailType.Standard, PolarCurveUtility.createTestPolarCurve());
 
         val params = new SailboatParams(SimulationUnits.simUnitFromMeter(10), SimulationUnits.simUnitFromMeter(14), 30, 3000, sails);
 
-        val strategy = new DirectLineStrategy(Coordinate.SimCoordsFromInt(100, 100));
+        val strategy = new DirectLineStrategy(Coordinate.SimCoords(goalX, goalY));
         val possibleActions = List(new Turn(params.turnSpeed));
         val ongoingActions = List.empty[(SailingAction, Int)];
 

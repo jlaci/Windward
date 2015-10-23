@@ -15,8 +15,8 @@ import windward.simulation.units.{Coordinate, SimUnit}
 class DirectLineStrategy(goalPosition : Coordinate[SimUnit]) extends TravelStrategy[Sailboat ,SailingAction](goalPosition){
 
     override def step(sailboat : Sailboat, world: World): List[SailingAction] = {
-        val dir = DenseVector[Int](goalPosition.x.toInt - sailboat.position.x.toInt, goalPosition.y.toInt - sailboat.position.y.toInt);
-        val north = DenseVector[Int](0, 1);
+        val dir = DenseVector[Float](goalPosition.x.toFloat - sailboat.position.x.toFloat, goalPosition.y.toFloat - sailboat.position.y.toFloat);
+        val north = DenseVector[Float](0, 1);
 
         val heading = Math.acos((dir dot north)/(dir.length * north.length));
 

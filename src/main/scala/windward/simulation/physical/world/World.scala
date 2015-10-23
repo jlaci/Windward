@@ -3,6 +3,8 @@ package windward.simulation.physical.world
 import windward.simulation.physical.weather.WeatherMap
 import windward.simulation.units.{CellUnit, SimUnit}
 
+import scala.collection.mutable
+
 /**
  * Created by jlaci on 2015. 09. 18..
  */
@@ -13,7 +15,7 @@ class World(val width: SimUnit, val height: SimUnit, val cells: Array[Array[Cell
         for (rowIndex <- 0 until cells.length) {
             cells(rowIndex) = new Array[Cell](width.toCellUnit.toInt);
             for (columnIndex <- 0 until cells(rowIndex).length) {
-                cells(rowIndex)(columnIndex) = new Cell(new CellUnit(rowIndex * CELL_SIZE), new CellUnit(columnIndex * CELL_SIZE), weatherMap.direction(rowIndex)(columnIndex), weatherMap.speed(rowIndex)(columnIndex));
+                cells(rowIndex)(columnIndex) = new Cell(new CellUnit(rowIndex), new CellUnit(columnIndex), weatherMap.direction(rowIndex)(columnIndex), weatherMap.speed(rowIndex)(columnIndex));
             }
         }
     }
@@ -23,7 +25,7 @@ class World(val width: SimUnit, val height: SimUnit, val cells: Array[Array[Cell
         for (rowIndex <- 0 until cells.length) {
             cells(rowIndex) = new Array[Cell](width.toCellUnit.toInt);
             for (columnIndex <- 0 until cells(rowIndex).length) {
-                cells(rowIndex)(columnIndex) = new Cell(new CellUnit(rowIndex * CELL_SIZE), new CellUnit(columnIndex * CELL_SIZE), 0, 0);
+                cells(rowIndex)(columnIndex) = new Cell(new CellUnit(rowIndex), new CellUnit(columnIndex), 0, 0);
             }
         }
     }
@@ -39,16 +41,16 @@ class World(val width: SimUnit, val height: SimUnit, val cells: Array[Array[Cell
         val xEnd = Math.min(width.toCellUnit.toInt, (x + r).toInt);
         val yEnd = Math.min(width.toCellUnit.toInt, (y + r).toInt);
 
-        var result = List[Cell]();
-        for (rowIndex <- xStart until xEnd) {
-            for (columnIndex <- yStart until yEnd) {
+        var result = new mutable.MutableList[Cell]();
+        for (rowIndex <- xStart.toInt until xEnd.toInt) {
+            for (columnIndex <- yStart.toInt until yEnd.toInt) {
                 val cell = cells(rowIndex)(columnIndex);
-                if(distance(x.toInt, y.toInt, cell.x.toInt, cell.y.toInt) >= r.toInt) {
-                    result ::= cell;
+                if(distance(x.toInt, y.toInt, cell.x.toInt, cell.y.toInt) <= r.toInt) {
+                    result += cell;
                 }
             }
         }
 
-        result;
+        result.toList;
     }
 }

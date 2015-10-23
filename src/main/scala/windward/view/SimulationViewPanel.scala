@@ -1,6 +1,7 @@
 package windward.view
 
 import java.awt._
+import java.awt.geom.GeneralPath
 
 import windward.simulation.Simulator
 import windward.simulation.logical.domain.sailing.Sailboat
@@ -54,22 +55,33 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
         val oneCellUnitOnScreen = minDimension / viewSize;
         val oneSimUnitOnScreen = oneCellUnitOnScreen / SimulationUnits.tileSizeInSimUnits;
 
-        g.setColor(Color.cyan)
-        val width = sailboat.params.length.toInt() * oneSimUnitOnScreen;
+
+        val width = sailboat.params.length.toFloat() * oneSimUnitOnScreen;
         val length =  (width / 2).toInt;
 
         val oldTransform = g.getTransform;
         val angle = Math.toRadians(sailboat.heading);
-        val at = java.awt.geom.AffineTransform.getTranslateInstance(sailboat.posX.toInt * oneSimUnitOnScreen, sailboat.posY.toInt * oneSimUnitOnScreen);
 
-        at.concatenate(java.awt.geom.AffineTransform.getRotateInstance(angle));
-        g.transform(at);
-        val polygon = new Polygon();
-        polygon.addPoint(((sailboat.posX.toInt() * oneSimUnitOnScreen) - length/2).toInt, (sailboat.posY.toInt() * oneSimUnitOnScreen + width/2).toInt);
-        polygon.addPoint(((sailboat.posX.toInt() * oneSimUnitOnScreen) + length/2).toInt, (sailboat.posY.toInt() * oneSimUnitOnScreen + width/2).toInt);
-        polygon.addPoint((sailboat.posX.toInt() * oneSimUnitOnScreen).toInt, (sailboat.posY.toInt() * oneSimUnitOnScreen - width/2).toInt);
+        val transform = java.awt.geom.AffineTransform.getTranslateInstance((sailboat.posX.toFloat * oneSimUnitOnScreen) - (x * oneCellUnitOnScreen), sailboat.posY.toFloat * oneSimUnitOnScreen - (y * oneCellUnitOnScreen));
+        val rotate = java.awt.geom.AffineTransform.getRotateInstance(angle);
+        val inverseTranslate = java.awt.geom.AffineTransform.getTranslateInstance(-sailboat.posX.toFloat * oneSimUnitOnScreen, -sailboat.posY.toFloat * oneSimUnitOnScreen);
+        transform.concatenate(rotate);
+        transform.concatenate(inverseTranslate)
+        g.transform(transform);
 
-        g.fillPolygon(polygon);
+
+        val polygon = new GeneralPath();
+        polygon.moveTo(((sailboat.posX.toFloat() * oneSimUnitOnScreen) - length/2).toInt, (sailboat.posY.toFloat() * oneSimUnitOnScreen + width/2).toInt);
+        polygon.lineTo(((sailboat.posX.toFloat() * oneSimUnitOnScreen) + length/2).toInt, (sailboat.posY.toFloat() * oneSimUnitOnScreen + width/2).toInt);
+        polygon.lineTo((sailboat.posX.toFloat() * oneSimUnitOnScreen).toInt, (sailboat.posY.toFloat() * oneSimUnitOnScreen - width/2).toInt);
+        polygon.closePath();
+
+        g.setColor(Color.gray)
+        g.fill(polygon);
+
+        g.setColor(Color.black)
+        g.draw(polygon)
+
         g.setTransform(oldTransform);
     }
 
@@ -179,6 +191,6 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
     }
 
     private def calculateColor(windSpeed: Float): Color = {
-        Color.getHSBColor(windSpeed / SimulationUnits.maxWindSpeed, 0.5f, 1);
+        Color.getHSBColor(((windSpeed + 10) / (SimulationUnits.maxWindSpeed + 10)), 0.5f, 1);
     }
 }
