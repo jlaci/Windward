@@ -8,6 +8,6 @@ import windward.simulation.physical.world.World
 object PhysicalSimulator {
 
     def step(world: World): World = {
-        WorldBuilder.createWorldWithRandomWind(world.width, world.height)
+        world
     }
 }

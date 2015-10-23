@@ -5,7 +5,7 @@ package windward.simulation.logical.domain.sailing.polar
  */
 class PolarCurve (val polarData : Array[Array[Int]]) {
 
-    def getMaxSpeed(trueWindSpeed : Int, trueWindDirection : Int): Unit = {
+    def getMaxSpeed(trueWindSpeed : Int, trueWindDirection : Int): Int = {
         polarData(trueWindSpeed)(trueWindDirection);
     }
 }

@@ -3,7 +3,6 @@ package windward.view
 import java.awt._
 
 import windward.simulation.Simulator
-import windward.simulation.logical.Actor
 import windward.simulation.logical.domain.sailing.Sailboat
 import windward.simulation.units.SimulationUnits
 
@@ -179,7 +178,7 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
         result.toArray
     }
 
-    private def calculateColor(windSpeed: Int): Color = {
+    private def calculateColor(windSpeed: Float): Color = {
         Color.getHSBColor(windSpeed / SimulationUnits.maxWindSpeed, 0.5f, 1);
     }
 }

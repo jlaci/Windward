@@ -9,7 +9,7 @@ object SimulationUnits {
     var tileSizeInSimUnits : Float = 16f;
     var timeStepInMilliseconds : Int = 1000;
     var windSpeedInMeterPerSec = 0.1f;
-    var maxWindSpeed = 300f;
+    var maxWindSpeed = 30f;
 
     def simUnitFromMeter(meters : Float) : SimUnit = {
         return new SimUnit((meters / simUnitInMeters).toInt);

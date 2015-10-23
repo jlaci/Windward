@@ -1,6 +1,5 @@
 package windward.simulation.logical
 
-import windward.simulation.logical.Action
 import windward.simulation.physical.world.World
 
 /**

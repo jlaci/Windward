@@ -1,9 +1,9 @@
 package windward.simulation
 
-import windward.simulation.logical.{Actor, LogicalSimulator}
-import windward.simulation.logical.domain.sailing.{SailboatGenerator, Sailboat}
-import windward.simulation.physical.{PhysicalSimulator, WorldBuilder}
+import windward.simulation.logical.LogicalSimulator
+import windward.simulation.logical.domain.sailing.{Sailboat, SailboatGenerator}
 import windward.simulation.physical.world.World
+import windward.simulation.physical.{PhysicalSimulator, WorldBuilder}
 import windward.simulation.units.{SimUnit, SimulationUnits}
 
 
@@ -21,7 +21,7 @@ object Simulator {
     def init(parameters: SimulationParameters): Unit = {
         simulationParameters = parameters;
         worldState = new Array[World](parameters.endTime + 1)
-        worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 315, 300);
+        worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 315, 30);
 
         sailboats = new Array[Array[Sailboat]](parameters.endTime + 1)
         sailboats(0) = new Array[Sailboat](1);
