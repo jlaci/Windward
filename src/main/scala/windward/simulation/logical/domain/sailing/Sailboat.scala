@@ -78,8 +78,10 @@ class Sailboat(val posX: SimUnit,
         val averageWindDirectionVector = getAverageWindDirection(cells)
         val relativeWindDirection = getRelativeWindDirection(averageWindDirectionVector)
 
+        val apparentWindDirection = getApparentWindDirection(averageWindSpeed, relativeWindDirection)
+
         //The maximum achievable speed in these wind conditions
-        val maxSpeed = params.sails(activeSail).polarCurve.getMaxSpeed(averageWindSpeed.toInt, relativeWindDirection.toInt)
+        val maxSpeed = params.sails(activeSail).polarCurve.getMaxSpeed(averageWindSpeed.toInt, apparentWindDirection.toInt)
         val sailEfficiency = maxSpeed / averageWindSpeed
 
         val currentKineticEnergy = PhysicsUtility.calculateKineticEnergy(speed, params.mass)
@@ -114,6 +116,23 @@ class Sailboat(val posX: SimUnit,
     def getRelativeWindDirection(windDirection : DenseVector[Double]) : Double = {
         val headingVector = getHeadingVector()
         Math.toDegrees(Math.acos((headingVector dot windDirection)/(headingVector.length * windDirection.length)));
+    }
+
+    /**
+     * @param w True wind velocity
+     * @param alpha Relative wind direction
+     * @return
+     */
+    def getApparentWindDirection(w : Double, alpha : Double) : Double = {
+        val v = speed
+        Math.acos((w * Math.cos(alpha.toRadians) + speed)/(Math.sqrt(w * w + v * v + 2 * w * v * Math.cos(alpha.toRadians)))).toDegrees
+    }
+
+    def getApparentWindSpeed(windDirection : DenseVector[Double], windSpeed : Double) : Double = {
+        val windVector = windDirection * windSpeed
+        val velocityVector = getHeadingVector() * speed.toDouble
+        val appWindVector = (velocityVector + windVector)
+        Math.sqrt(appWindVector.data(0) * appWindVector.data(0) + appWindVector.data(1) * appWindVector.data(1))
     }
 
 }

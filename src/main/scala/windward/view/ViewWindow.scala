@@ -18,18 +18,44 @@ import scala.swing.event.{ButtonClicked, Key, KeyPressed}
  */
 class ViewWindow extends MainFrame {
 
-    var simViewPanel : SimulationViewPanel = null;
-    var viewXCoordTF : TextField = null;
-    var viewYCoordTF : TextField = null;
-    var viewSizeTF : TextField = null;
+    var simViewPanel : SimulationViewPanel = null
+    var viewXCoordTF : TextField = null
+    var viewYCoordTF : TextField = null
+    var viewSizeTF : TextField = null
 
-    var boatXCoordTF : TextField = null;
-    var boatYCoordTF : TextField = null;
-    var boatSpeedTF : TextField = null;
-    var boatHeadingTF : TextField = null;
-    var boatSailTF : TextField = null;
-    var windSpeedTF : TextField = null;
-    var windDirTF : TextField = null;
+    var boatXCoordTF : TextField = null
+    var boatYCoordTF : TextField = null
+    var boatSpeedTF : TextField = null
+    var boatHeadingTF : TextField = null
+    var boatSailTF : TextField = null
+    var trueWindSpeedTF : TextField = null
+    var trueWindDirTF : TextField = null
+    var appWindSpeedTF : TextField = null
+    var appWindDirTF : TextField = null
+
+    def getSailboat() = {
+        Simulator.sailboats(simViewPanel.viewSimStep)(0)
+    }
+
+    def getTrueWindSpeed = {
+        val sailboat = getSailboat()
+        sailboat.getAverageWindSpeed(sailboat.getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))
+    }
+
+    def getTrueWindDir = {
+        val sailboat = getSailboat()
+        sailboat.getRelativeWindDirection(sailboat.getAverageWindDirection(sailboat.getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep))))
+    }
+
+    def getAppWindSpeed = {
+        val sailboat = getSailboat()
+        sailboat.getApparentWindSpeed(sailboat.getAverageWindDirection(sailboat.getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep))), getTrueWindSpeed)
+    }
+
+    def getAppWindDir = {
+        val sailboat = getSailboat()
+        sailboat.getApparentWindDirection(getTrueWindSpeed, getTrueWindDir)
+    }
 
     def viewDataChanged = {
         viewXCoordTF.text = "X : " + simViewPanel.x
@@ -96,8 +122,10 @@ class ViewWindow extends MainFrame {
                         boatSpeedTF.text = formatter.format(PhysicsUtility.knotsFromMeterPreSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
                         boatHeadingTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).heading.toString
                         boatSailTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
-                        windSpeedTF.text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindSpeed(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))) + " m/s"
-                        windDirTF.text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getRelativeWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))))
+                        trueWindSpeedTF.text = formatter.format(getTrueWindSpeed) + " m/s"
+                        trueWindDirTF.text = formatter.format(getTrueWindDir)
+                        appWindSpeedTF.text = formatter.format(getAppWindSpeed) + " m/s"
+                        appWindDirTF.text = formatter.format(getAppWindDir)
                     }
 
                     contents += new Button {
@@ -224,7 +252,7 @@ class ViewWindow extends MainFrame {
                     border = BorderFactory.createTitledBorder("Boat");
 
                     val bdpc = new Constraints()
-                    bdpc.grid = (2, 7)
+                    bdpc.grid = (2, 9)
                     bdpc.fill = GridBagPanel.Fill.Horizontal
                     bdpc.weightx = 0.5;
 
@@ -304,35 +332,65 @@ class ViewWindow extends MainFrame {
                     bdpc.gridx = 1
                     layout(boatSailTF) = bdpc
 
-                    //Windspeed
-                    val windSpeedLabel = new Label("Wind speed:") {
+                    //True Windspeed
+                    val windSpeedLabel = new Label("TWS:") {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
                     bdpc.gridy = 5
                     layout(windSpeedLabel) = bdpc
 
-                    windSpeedTF = new TextField() {
+                    trueWindSpeedTF = new TextField() {
                         columns = 5
-                        text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindSpeed(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))) + " m/s"
+                        text = formatter.format(getTrueWindSpeed) + " m/s"
                     }
                     bdpc.gridx = 1
-                    layout(windSpeedTF) = bdpc
+                    layout(trueWindSpeedTF) = bdpc
 
                     //Relative wind direction
-                    val windDirLabel = new Label("Wind direction:") {
+                    val windDirLabel = new Label("TWD:") {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
                     bdpc.gridy = 6
                     layout(windDirLabel) = bdpc
 
-                    windDirTF = new TextField() {
+                    trueWindDirTF = new TextField() {
                         columns = 5
-                        text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).getRelativeWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getAverageWindDirection(Simulator.sailboats(simViewPanel.viewSimStep)(0).getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))))
+                        text = formatter.format(getTrueWindDir)
                     }
                     bdpc.gridx = 1
-                    layout(windDirTF) = bdpc
+                    layout(trueWindDirTF) = bdpc
+
+                    //Apparent Windspeed
+                    val apparentWindSpeedLabel = new Label("AWS:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 7
+                    layout(apparentWindSpeedLabel) = bdpc
+
+                    appWindSpeedTF = new TextField() {
+                        columns = 5
+                        text = formatter.format(getAppWindSpeed) + " m/s"
+                    }
+                    bdpc.gridx = 1
+                    layout(appWindSpeedTF) = bdpc
+
+                    //Apparent wind angle
+                    val apparentWindDirLabel = new Label("AWA:") {
+                        horizontalAlignment = Alignment.Left
+                    }
+                    bdpc.gridx = 0
+                    bdpc.gridy = 8
+                    layout(apparentWindDirLabel) = bdpc
+
+                    appWindDirTF = new TextField() {
+                        columns = 5
+                        text = formatter.format(getAppWindDir)
+                    }
+                    bdpc.gridx = 1
+                    layout(appWindDirTF) = bdpc
 
                 }
                 dpc.gridy = 1
