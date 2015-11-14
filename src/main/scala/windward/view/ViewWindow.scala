@@ -72,15 +72,14 @@ class ViewWindow extends MainFrame {
 
 
         //The top menu
-        val topMenu = new FlowPanel() {
-            border = BorderFactory.createTitledBorder("Menu");
+        val topMenu = new FlowPanel(FlowPanel.Alignment.Left)(new Button() {
+            text = "Simulation view"
+        }) {
+            border = BorderFactory.createTitledBorder("Menu")
 
             contents += new Button() {
-                text = "Simulation view"
-            } += new Button() {
-                text = "Global settings"
+                text = "Simulation settings"
             }
-
         }
         cw.fill = Fill.Horizontal;
         layout(topMenu) = cw;
@@ -119,7 +118,7 @@ class ViewWindow extends MainFrame {
                         timeStepTF.text = simViewPanel.viewSimStep + " / " + Simulator.simulationParameters.endTime
                         boatXCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
                         boatYCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
-                        boatSpeedTF.text = formatter.format(PhysicsUtility.knotsFromMeterPreSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
+                        boatSpeedTF.text = formatter.format(PhysicsUtility.knotsFromMeterPerSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
                         boatHeadingTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).heading.toString
                         boatSailTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
                         trueWindSpeedTF.text = formatter.format(getTrueWindSpeed) + " m/s"
@@ -252,7 +251,7 @@ class ViewWindow extends MainFrame {
                     border = BorderFactory.createTitledBorder("Boat");
 
                     val bdpc = new Constraints()
-                    bdpc.grid = (2, 9)
+                    bdpc.grid = (2, 10)
                     bdpc.fill = GridBagPanel.Fill.Horizontal
                     bdpc.weightx = 0.5;
 
@@ -276,7 +275,7 @@ class ViewWindow extends MainFrame {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 1
+                    bdpc.gridy += 1
                     layout(yCoordLabel) = bdpc
 
                     boatYCoordTF = new TextField() {
@@ -292,12 +291,12 @@ class ViewWindow extends MainFrame {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 2
+                    bdpc.gridy += 1
                     layout(speedLabel) = bdpc
 
                     boatSpeedTF = new TextField() {
                         columns = 5
-                        text = formatter.format(PhysicsUtility.knotsFromMeterPreSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
+                        text = formatter.format(PhysicsUtility.knotsFromMeterPerSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
                     }
                     bdpc.gridx = 1
                     layout(boatSpeedTF) = bdpc
@@ -307,7 +306,7 @@ class ViewWindow extends MainFrame {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 3
+                    bdpc.gridy += 1
                     layout(headingLabel) = bdpc
 
                     boatHeadingTF = new TextField() {
@@ -322,7 +321,7 @@ class ViewWindow extends MainFrame {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 4
+                    bdpc.gridy += 1
                     layout(sailLabel) = bdpc
 
                     boatSailTF = new TextField() {
@@ -332,12 +331,20 @@ class ViewWindow extends MainFrame {
                     bdpc.gridx = 1
                     layout(boatSailTF) = bdpc
 
+                    //Separator
+                    val separator = new Separator(Orientation.Horizontal)
+                    bdpc.gridx = 0
+                    bdpc.gridwidth = 2
+                    bdpc.gridy += 1
+                    layout(separator) = bdpc
+                    bdpc.gridwidth = 1
+
                     //True Windspeed
                     val windSpeedLabel = new Label("TWS:") {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 5
+                    bdpc.gridy += 1
                     layout(windSpeedLabel) = bdpc
 
                     trueWindSpeedTF = new TextField() {
@@ -348,11 +355,11 @@ class ViewWindow extends MainFrame {
                     layout(trueWindSpeedTF) = bdpc
 
                     //Relative wind direction
-                    val windDirLabel = new Label("TWD:") {
+                    val windDirLabel = new Label("TWA:") {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 6
+                    bdpc.gridy += 1
                     layout(windDirLabel) = bdpc
 
                     trueWindDirTF = new TextField() {
@@ -367,7 +374,7 @@ class ViewWindow extends MainFrame {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 7
+                    bdpc.gridy += 1
                     layout(apparentWindSpeedLabel) = bdpc
 
                     appWindSpeedTF = new TextField() {
@@ -382,7 +389,7 @@ class ViewWindow extends MainFrame {
                         horizontalAlignment = Alignment.Left
                     }
                     bdpc.gridx = 0
-                    bdpc.gridy = 8
+                    bdpc.gridy += 1
                     layout(apparentWindDirLabel) = bdpc
 
                     appWindDirTF = new TextField() {

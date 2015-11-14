@@ -13,6 +13,10 @@ object WorldBuilder {
         new World(width, height);
     }
 
+    def createWorldWithUniformWind(width: SimUnit, height: SimUnit, windDirection: Int, windSpeed: Int) : World = {
+        new World(width, height, WeatherGenerator.initUniformWind(width, height, windDirection, windSpeed))
+    }
+
     def createWorldWithRandomWind(width: SimUnit, height: SimUnit): World = {
         new World(width, height, WeatherGenerator.initRandomWind(width, height, 0, SimulationUnits.maxWindSpeed.toInt));
     }

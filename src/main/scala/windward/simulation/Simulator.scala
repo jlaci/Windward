@@ -22,13 +22,14 @@ object Simulator {
         simulationParameters = parameters;
         worldState = new Array[World](parameters.endTime + 1)
         worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 315, 30);
+        //worldState(0) = WorldBuilder.createWorldWithUniformWind(parameters.worldWidth, parameters.worldHeight, 315, 20);
+        //worldState(0) = WorldBuilder.createWorldWithRandomWind(parameters.worldWidth, parameters.worldHeight);
+
 
         sailboats = new Array[Array[Sailboat]](parameters.endTime + 1)
         sailboats(0) = new Array[Sailboat](1);
-        sailboats(0)(0) = SailboatGenerator.getTestSailboat(new SimUnit(512), new SimUnit(512), 45, parameters.worldWidth, parameters.worldHeight)
+        sailboats(0)(0) = SailboatGenerator.getTestSailboat(new SimUnit(512), new SimUnit(512), 45, new SimUnit(0), new SimUnit(0))
 
-        //WeatherGenerator.initUniformWind(world, 0, 6);
-        //WeatherGenerator.initRandomWind(world, 6, 30);
     }
 
     def start(): Unit = {

@@ -5,15 +5,15 @@ package windward.simulation.physical
  */
 object PhysicsUtility {
 
-    def calculateKineticEnergy(v : Float, m : Float) : Double = {
+    def calculateKineticEnergy(v : Double, m : Double) : Double = {
         0.5 * m * v * v
     }
 
-    def calculateSpeedFromKineticEnergy(energy : Double, m : Float) : Float = {
-        Math.sqrt(((energy / 0.5) / m)).toFloat
+    def calculateSpeedFromKineticEnergy(energy : Double, m : Double) : Double = {
+        Math.sqrt(((energy / 0.5) / m))
     }
 
-    def knotsFromMeterPreSecond(ms : Float) : Float = {
+    def knotsFromMeterPerSecond(ms : Double) : Double = {
         ms * 1.94384449246f
     }
 }

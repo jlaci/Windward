@@ -22,7 +22,7 @@ object WeatherGenerator {
         val speed: Array[Array[Float]] = new Array[Array[Float]](width.toCellUnit.toInt);
         val direction: Array[Array[Int]] = new Array[Array[Int]](width.toCellUnit.toInt);
 
-        for (rowIndex <- 0 until width.toInt) {
+        for (rowIndex <- 0 until width.toCellUnit.toInt) {
             speed(rowIndex) = new Array[Float](height.toCellUnit.toInt);
             direction(rowIndex) = new Array[Int](height.toCellUnit.toInt);
 

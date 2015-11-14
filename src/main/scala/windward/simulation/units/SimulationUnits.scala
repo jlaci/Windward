@@ -12,11 +12,11 @@ object SimulationUnits {
     var maxWindSpeed = 30f;
 
     def simUnitFromMeter(meters : Float) : SimUnit = {
-        return new SimUnit((meters / simUnitInMeters).toFloat);
+        return new SimUnit((meters / simUnitInMeters))
     }
 
     def simUnitFromMeter(meters : Double) : SimUnit = {
-        return new SimUnit((meters / simUnitInMeters).toFloat);
+        return new SimUnit((meters / simUnitInMeters).toFloat)
     }
 
 }

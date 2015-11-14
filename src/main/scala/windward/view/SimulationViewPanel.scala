@@ -5,7 +5,7 @@ import java.awt.geom.GeneralPath
 
 import windward.simulation.Simulator
 import windward.simulation.logical.domain.sailing.Sailboat
-import windward.simulation.units.SimulationUnits
+import windward.simulation.units.{SimUnit, SimulationUnits}
 
 import scala.collection.mutable
 import scala.swing.{Graphics2D, Panel}
@@ -44,8 +44,44 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
             drawWindDirection(x1, y1, x2, y2, g, windData(x)(y) _2)
         }
 
+        drawSailboatPaths(g)
+
         for (sailboat <- sailboats) {
             drawSailboat(sailboat, g)
+        }
+
+    }
+
+    def drawSailboatPaths(g : Graphics2D) : Unit = {
+        //TODO: multiple sailboats
+        val positions = for (timeStep <- 0 to viewSimStep) yield (Simulator.sailboats(timeStep)(0).posX, Simulator.sailboats(timeStep)(0).posY)
+
+        if (!positions.isEmpty) {
+            val minDimension = Math.min(g.getClipBounds.width.toFloat, g.getClipBounds.height.toFloat)
+            val oneCellUnitOnScreen = minDimension / viewSize
+            val oneSimUnitOnScreen = oneCellUnitOnScreen / SimulationUnits.tileSizeInSimUnits
+
+            val oldTransform = g.getTransform
+            val transform = java.awt.geom.AffineTransform.getTranslateInstance(-x * oneCellUnitOnScreen, -y * oneCellUnitOnScreen)
+            g.setTransform(transform);
+
+            val path = new GeneralPath()
+            var first = true
+
+            for (position <- positions) {
+                if (first) {
+                    path.moveTo(((position._1.toFloat() * oneSimUnitOnScreen)).toInt, ((position._2.toFloat() * oneSimUnitOnScreen).toInt))
+                    first = false
+                } else {
+                    path.lineTo(((position._1.toFloat() * oneSimUnitOnScreen)).toInt, ((position._2.toFloat() * oneSimUnitOnScreen).toInt))
+                }
+            }
+
+
+            g.setColor(Color.black)
+            g.draw(path)
+
+            g.setTransform(oldTransform);
         }
 
     }

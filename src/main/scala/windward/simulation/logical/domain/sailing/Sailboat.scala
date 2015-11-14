@@ -14,8 +14,8 @@ import windward.simulation.units.{Coordinate, SimUnit, SimulationUnits}
 class Sailboat(val posX: SimUnit,
                val posY : SimUnit,
                val params: SailboatParams,
-               val heading : Int,
-               val speed : Float,
+               val heading : Double,
+               val speed : Double,
                val activeSail : Int,
                val strategy : Strategy[Sailboat, SailingAction],
                val possibleActions : List[SailingAction],
@@ -52,7 +52,7 @@ class Sailboat(val posX: SimUnit,
     }
 
     def getHeadingVector() : DenseVector[Double] = {
-        DenseVector[Double](Math.cos(Math.toRadians(heading - 90)), -Math.sin(Math.toRadians(heading - 90)))
+        DenseVector[Double](Math.cos(Math.toRadians(heading - 90)), Math.sin(Math.toRadians(heading - 90)))
     }
 
     def getEffectingCells(world : World) : List[Cell] = {
@@ -68,12 +68,12 @@ class Sailboat(val posX: SimUnit,
         //val y = world.height.toMeters() - Math.sin(Math.toRadians(heading - 90)) * newSpeed
 
         val x = posX.toMeters() + velocityVector.data(0) * newSpeed
-        val y = posY.toMeters() - velocityVector.data(1) * newSpeed
+        val y = posY.toMeters() + velocityVector.data(1) * newSpeed
 
         new Sailboat(SimulationUnits.simUnitFromMeter(x), SimulationUnits.simUnitFromMeter(y), params, heading, newSpeed, 0, strategy, possibleActions, ongoingActions);
     }
 
-    def calculateSpeed(cells : List[Cell]) : Float = {
+    def calculateSpeed(cells : List[Cell]) : Double = {
         val averageWindSpeed = getAverageWindSpeed(cells)
         val averageWindDirectionVector = getAverageWindDirection(cells)
         val relativeWindDirection = getRelativeWindDirection(averageWindDirectionVector)
