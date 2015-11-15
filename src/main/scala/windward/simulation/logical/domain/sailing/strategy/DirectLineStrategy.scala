@@ -15,7 +15,32 @@ import windward.simulation.units.{SimulationUnits, Coordinate, SimUnit}
 class DirectLineStrategy(goalPosition : Coordinate[SimUnit]) extends TravelStrategy[Sailboat, SailingAction](goalPosition){
 
     override def step(sailboat : Sailboat, world: World): List[SailingAction] = {
-        var dir = DenseVector[Double](goalPosition.x.toFloat - sailboat.position.x.toFloat, -(goalPosition.y.toFloat - sailboat.position.y.toFloat))
+        List(new Turn(limitHeadingChange(getHeadingChange(getHeadingToDirectionPoint(sailboat.position, goalPosition), sailboat.heading), sailboat)))
+    }
+
+
+    private def limitHeadingChange(delta : Double, sailboat: Sailboat) : Double = {
+        val max = sailboat.params.turnSpeed * SimulationUnits.timeStepInMilliseconds/1000
+
+        if(delta > 0) {
+            Math.min(delta, max)
+        } else {
+            Math.max(delta, -max)
+        }
+    }
+
+    private def getHeadingChange(newHeading : Double, oldHeading : Double): Double = {
+        var delta = newHeading - oldHeading
+
+        if(delta > 180) {
+            delta = delta - 360
+        }
+
+        delta
+    }
+
+    private def getHeadingToDirectionPoint(from : Coordinate[SimUnit], to : Coordinate[SimUnit]): Double = {
+        var dir = DenseVector[Double](to.x.toFloat - from.x.toFloat, -(to.y.toFloat - from.y.toFloat))
         val dirLength = Math.sqrt(dir.data(0) * dir.data(0) + dir.data(1) * dir.data(1))
         dir = dir/dirLength
 
@@ -32,15 +57,7 @@ class DirectLineStrategy(goalPosition : Coordinate[SimUnit]) extends TravelStrat
             angle = northAngle
         }
 
-        val newHeading = Math.toDegrees(angle)
-        val delta = newHeading - sailboat.heading
-        val max = sailboat.params.turnSpeed * SimulationUnits.timeStepInMilliseconds/1000
-
-        if(delta > 0) {
-            List(new Turn(Math.min(delta, max)))
-        } else {
-            List(new Turn(Math.max(delta, -max)))
-        }
+        Math.toDegrees(angle)
     }
 
 }

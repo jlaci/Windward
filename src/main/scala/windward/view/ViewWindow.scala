@@ -98,7 +98,7 @@ class ViewWindow extends MainFrame {
                 cs.weighty = 0.1
 
                 //The actual view panel
-                simViewPanel = new SimulationViewPanel(Simulator.simulationParameters.worldWidth.toCellUnit().toInt() / 2, Simulator.simulationParameters.worldHeight.toCellUnit().toInt() / 2, 16) {
+                simViewPanel = new SimulationViewPanel(Simulator.simulationParameters.worldWidth.toCellUnit().toInt() / 2 - 16, Simulator.simulationParameters.worldHeight.toCellUnit().toInt() / 2 - 16, 32) {
                     preferredSize = new swing.Dimension(750, 750)
                 }
                 cs.anchor = GridBagPanel.Anchor.Center
@@ -119,8 +119,8 @@ class ViewWindow extends MainFrame {
                         boatXCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
                         boatYCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
                         boatSpeedTF.text = formatter.format(PhysicsUtility.knotsFromMeterPerSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
-                        boatHeadingTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).heading.toString
-                        boatSailTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
+                        boatHeadingTF.text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).heading)
+                        boatSailTF.text = if(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail == -1) "none" else Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
                         trueWindSpeedTF.text = formatter.format(getTrueWindSpeed) + " m/s"
                         trueWindDirTF.text = formatter.format(getTrueWindDir)
                         appWindSpeedTF.text = formatter.format(getAppWindSpeed) + " m/s"
@@ -128,11 +128,20 @@ class ViewWindow extends MainFrame {
                     }
 
                     contents += new Button {
-                        text = "Start"
+                        text = "Center"
+                        reactions += {
+                            case ButtonClicked(_) => {
+                                val maxX = Simulator.simulationParameters.worldWidth.toCellUnit().value - simViewPanel.viewSize
+                                val maxY = Simulator.simulationParameters.worldHeight.toCellUnit().value - simViewPanel.viewSize
+
+                                simViewPanel.x = Math.min(maxX, Math.max(Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toCellUnit.value - simViewPanel.viewSize/2,0))
+                                simViewPanel.y = Math.min(maxY, Math.max(Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toCellUnit.value - simViewPanel.viewSize/2,0))
+                                simStepChanged
+                                viewDataChanged
+                            };
+                        }
                     } += new Button {
-                        text = "Stop"
-                    } += new Button {
-                        text = "Jump to beginning"
+                        text = "Begining"
                         reactions += {
                             case ButtonClicked(_) => {
                                 simViewPanel.viewSimStep = 0;
@@ -140,11 +149,21 @@ class ViewWindow extends MainFrame {
                             };
                         }
                     } += new Button() {
+                        text = "<<"
+                        reactions += {
+                            case ButtonClicked(_) => {
+                                if (simViewPanel.viewSimStep > 0) {
+                                    simViewPanel.viewSimStep = Math.max(simViewPanel.viewSimStep - 10, 0)
+                                    simStepChanged
+                                }
+                            };
+                        }
+                    } += new Button() {
                         text = "<"
                         reactions += {
                             case ButtonClicked(_) => {
                                 if (simViewPanel.viewSimStep > 0) {
-                                    simViewPanel.viewSimStep -= 1;
+                                    simViewPanel.viewSimStep -= 1
                                     simStepChanged
                                 }
                             };
@@ -154,13 +173,23 @@ class ViewWindow extends MainFrame {
                         reactions += {
                             case ButtonClicked(_) => {
                                 if (simViewPanel.viewSimStep < Simulator.simulationParameters.endTime) {
-                                    simViewPanel.viewSimStep += 1;
+                                    simViewPanel.viewSimStep += 1
+                                    simStepChanged
+                                }
+                            };
+                        };
+                    } += new Button() {
+                        text = ">>"
+                        reactions += {
+                            case ButtonClicked(_) => {
+                                if (simViewPanel.viewSimStep < Simulator.simulationParameters.endTime) {
+                                    simViewPanel.viewSimStep = Math.min(simViewPanel.viewSimStep + 10, Simulator.simulationParameters.endTime)
                                     simStepChanged
                                 }
                             };
                         };
                     } += new Button {
-                        text = "Jump to end"
+                        text = "End"
                         reactions += {
                             case ButtonClicked(_) => {
                                 simViewPanel.viewSimStep = Simulator.simulationParameters.endTime;
@@ -409,56 +438,67 @@ class ViewWindow extends MainFrame {
                 dpc.weighty = 100
                 layout(emptySpaceFiller) = dpc
             }
-            cm.gridx = 2;
-            cm.gridwidth = 1;
-            layout(dataPanel) = cm;
+            cm.gridx = 2
+            cm.gridwidth = 1
+            layout(dataPanel) = cm
 
         }
-        cw.fill = Fill.Both;
-        cw.gridy = 1;
-        layout(mainPanel) = cw;
+        cw.fill = Fill.Both
+        cw.gridy = 1
+        layout(mainPanel) = cw
 
         //Event listeners
         listenTo(keys)
         reactions += {
             case KeyPressed(_, Key.Up, _, _) => {
                 if (simViewPanel.y > 0) {
-                    simViewPanel.y -= 1;
+                    simViewPanel.y -= 1
                     viewDataChanged
                     repaint()
                 }
             }
             case KeyPressed(_, Key.Left, _, _) => {
                 if(simViewPanel.x > 0) {
-                    simViewPanel.x -= 1;
+                    simViewPanel.x -= 1
                     viewDataChanged
                     repaint()
                 }
             }
             case KeyPressed(_, Key.Down, _, _) => {
                 if(simViewPanel.y < Simulator.simulationParameters.worldHeight.toCellUnit().toInt() - simViewPanel.viewSize) {
-                    simViewPanel.y += 1;
+                    simViewPanel.y += 1
                     viewDataChanged
                     repaint()
                 }
             }
             case KeyPressed(_, Key.Right, _, _) => {
                 if(simViewPanel.x < Simulator.simulationParameters.worldWidth.toCellUnit().toInt() - simViewPanel.viewSize) {
-                    simViewPanel.x += 1;
+                    simViewPanel.x += 1
                     viewDataChanged
                     repaint()
                 }
             }
             case KeyPressed(_, Key.Subtract, _, _) => {
-                if(simViewPanel.viewSize < Math.min(32, Math.max(Simulator.simulationParameters.worldWidth.toCellUnit().toInt(), Simulator.simulationParameters.worldHeight.toCellUnit().toInt()))) {
-                    simViewPanel.viewSize += 1;
+                if(simViewPanel.viewSize < Math.min(64, Math.max(Simulator.simulationParameters.worldWidth.toCellUnit().toInt(), Simulator.simulationParameters.worldHeight.toCellUnit().toInt()))) {
+                    val maxX = Simulator.simulationParameters.worldWidth.toCellUnit().value - simViewPanel.viewSize
+                    val maxY = Simulator.simulationParameters.worldHeight.toCellUnit().value - simViewPanel.viewSize
+                    simViewPanel.viewSize += 1
+
+                    if(simViewPanel.x > maxX) {
+                        simViewPanel.x = maxX
+                    }
+
+                    if(simViewPanel.y > maxY) {
+                        simViewPanel.y = maxY
+                    }
+
                     viewDataChanged
                     repaint()
                 }
             }
             case KeyPressed(_, Key.Add, _, _) => {
                 if(simViewPanel.viewSize > 1) {
-                    simViewPanel.viewSize -= 1;
+                    simViewPanel.viewSize -= 1
                     viewDataChanged
                     repaint()
                 }

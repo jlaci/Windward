@@ -22,11 +22,11 @@ class Sailboat(val posX: SimUnit,
                val ongoingActions : List[(SailingAction, Int)]) extends Actor(Coordinate.SimCoords(posX, posY)) {
 
     override def getEffects(world: World): Array[CellEffect] = {
-        Array.empty;
+        Array.empty
     }
 
     override def step(world: World): Sailboat = {
-        var result = this;
+        var result = this
 
         //First we apply the previous state
         result = applyPreviousState(world)
@@ -42,7 +42,7 @@ class Sailboat(val posX: SimUnit,
     }
 
     def calculateNewState(sailboat: Sailboat, world: World) : Sailboat = {
-        var result = sailboat;
+        var result = sailboat
 
         for(action <- strategy.step(result, world)) {
             result = action.applyOn(result)
@@ -64,9 +64,6 @@ class Sailboat(val posX: SimUnit,
 
         val velocityVector = getHeadingVector()
 
-        //val x = posX.toMeters() + Math.cos(Math.toRadians(heading - 90)) * newSpeed
-        //val y = world.height.toMeters() - Math.sin(Math.toRadians(heading - 90)) * newSpeed
-
         val x = posX.toMeters() + velocityVector.data(0) * newSpeed
         val y = posY.toMeters() + velocityVector.data(1) * newSpeed
 
@@ -74,22 +71,26 @@ class Sailboat(val posX: SimUnit,
     }
 
     def calculateSpeed(cells : List[Cell]) : Double = {
-        val averageWindSpeed = getAverageWindSpeed(cells)
-        val averageWindDirectionVector = getAverageWindDirection(cells)
-        val relativeWindDirection = getRelativeWindDirection(averageWindDirectionVector)
+        if(activeSail != -1) {
+            val averageWindSpeed = getAverageWindSpeed(cells)
+            val averageWindDirection = getAverageWindDirection(cells)
+            val relativeWindDirection = getRelativeWindDirection(averageWindDirection)
 
-        val apparentWindDirection = getApparentWindDirection(averageWindSpeed, relativeWindDirection)
+            val apparentWindDirection = getApparentWindDirection(averageWindSpeed, relativeWindDirection)
 
-        //The maximum achievable speed in these wind conditions
-        val maxSpeed = params.sails(activeSail).polarCurve.getMaxSpeed(averageWindSpeed.toInt, apparentWindDirection.toInt)
-        val sailEfficiency = maxSpeed / averageWindSpeed
+            //The maximum achievable speed in these wind conditions
+            val maxSpeed = params.sails(activeSail).polarCurve.getMaxSpeed(averageWindSpeed.toInt, apparentWindDirection.toInt)
+            val sailEfficiency = maxSpeed / averageWindSpeed
 
-        val currentKineticEnergy = PhysicsUtility.calculateKineticEnergy(speed, params.mass)
-        val energyDifference = PhysicsUtility.calculateKineticEnergy(maxSpeed, params.mass) - currentKineticEnergy
+            val currentKineticEnergy = PhysicsUtility.calculateKineticEnergy(speed, params.mass)
+            val energyDifference = PhysicsUtility.calculateKineticEnergy(maxSpeed, params.mass) - currentKineticEnergy
 
-        val deltaEnergy = energyDifference * sailEfficiency
-        val newKineticEnergy = currentKineticEnergy + deltaEnergy
-        PhysicsUtility.calculateSpeedFromKineticEnergy(newKineticEnergy, params.mass)
+            val deltaEnergy = energyDifference * sailEfficiency
+            val newKineticEnergy = currentKineticEnergy + deltaEnergy
+            PhysicsUtility.calculateSpeedFromKineticEnergy(newKineticEnergy, params.mass)
+        } else {
+            0
+        }
     }
 
     def getAverageWindSpeed(cells : List[Cell]) : Double = {
@@ -106,16 +107,30 @@ class Sailboat(val posX: SimUnit,
         var averageDirectionVector = DenseVector[Double](0,0);
 
         for(cell <- cells) {
-            averageDirectionVector += DenseVector[Double](Math.cos(Math.toRadians(cell.windDirection)), Math.sin(Math.toRadians(cell.windDirection)));
+            averageDirectionVector += DenseVector[Double](Math.cos(Math.toRadians(cell.windDirection)), Math.sin(Math.toRadians(cell.windDirection)))
         }
 
         (averageDirectionVector / cells.length.toDouble)
     }
 
+    def getWindDirectionFromVector(vector : DenseVector[Double]) : Double = {
+
+        val angle = Math.toDegrees(Math.atan2(vector.data(1), vector.data(0)))
+        360 - angle
+    }
 
     def getRelativeWindDirection(windDirection : DenseVector[Double]) : Double = {
-        val headingVector = getHeadingVector()
-        Math.toDegrees(Math.acos((headingVector dot windDirection)/(headingVector.length * windDirection.length)));
+        //TODO: understand why
+        var windAngle = getWindDirectionFromVector(windDirection);
+
+        if(windAngle > 180) {
+            windAngle = 360 - windAngle
+        }
+
+        if(windAngle - heading < -180) {
+            windAngle = windAngle + 360
+        }
+        windAngle - heading
     }
 
     /**
@@ -125,7 +140,14 @@ class Sailboat(val posX: SimUnit,
      */
     def getApparentWindDirection(w : Double, alpha : Double) : Double = {
         val v = speed
-        Math.acos((w * Math.cos(alpha.toRadians) + speed)/(Math.sqrt(w * w + v * v + 2 * w * v * Math.cos(alpha.toRadians)))).toDegrees
+        val angle = Math.acos((w * Math.cos(alpha.toRadians) + speed)/(Math.sqrt(w * w + v * v + 2 * w * v * Math.cos(alpha.toRadians)))).toDegrees
+        if(angle == 360) {
+            0
+        } else {
+            angle
+        }
+
+
     }
 
     def getApparentWindSpeed(windDirection : DenseVector[Double], windSpeed : Double) : Double = {

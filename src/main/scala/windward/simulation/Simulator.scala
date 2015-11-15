@@ -19,7 +19,7 @@ object Simulator {
     var simulationParameters : SimulationParameters = null
 
     def init(parameters: SimulationParameters): Unit = {
-        simulationParameters = parameters;
+        simulationParameters = parameters
         worldState = new Array[World](parameters.endTime + 1)
         worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 315, 30);
         //worldState(0) = WorldBuilder.createWorldWithUniformWind(parameters.worldWidth, parameters.worldHeight, 315, 20);
@@ -28,7 +28,9 @@ object Simulator {
 
         sailboats = new Array[Array[Sailboat]](parameters.endTime + 1)
         sailboats(0) = new Array[Sailboat](1);
-        sailboats(0)(0) = SailboatGenerator.getTestSailboat(new SimUnit(512), new SimUnit(512), 45, new SimUnit(0), new SimUnit(0))
+        //sailboats(0)(0) = SailboatGenerator.getDirectLineSailboat(new SimUnit(512), new SimUnit(960), 45, new SimUnit(1021), new SimUnit(509))
+
+        sailboats(0)(0) = SailboatGenerator.getZStrategySailboat(new SimUnit(512), new SimUnit(960), 45, new SimUnit(512), new SimUnit(0))
 
     }
 

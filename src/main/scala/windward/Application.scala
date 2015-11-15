@@ -13,7 +13,7 @@ object Application {
     def main(args: Array[String]): Unit = {
         println("Windward starting.")
 
-        val params = new SimulationParameters(100, SimulationUnits.simUnitFromMeter(256), SimulationUnits.simUnitFromMeter(256));
+        val params = new SimulationParameters(500, SimulationUnits.simUnitFromMeter(256), SimulationUnits.simUnitFromMeter(256));
         Simulator.init(params);
 
         val window: ViewWindow = new ViewWindow();

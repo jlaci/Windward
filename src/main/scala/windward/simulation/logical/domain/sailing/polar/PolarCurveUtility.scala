@@ -39,8 +39,8 @@ object PolarCurveUtility {
         for (windSpeed <- 0 until SimulationUnits.maxWindSpeed.toInt) {
             polarData(windSpeed) = new Array[Float](360);
             for (windDirection <- 0 until 360) {
-                if(windDirection < 30 || windDirection > 330) {
-                    polarData(windSpeed)(windDirection) = 0;
+                if(windDirection < 15 || windDirection > 345) {
+                    polarData(windSpeed)(windDirection) = 0.5f;
                 } else {
                     val efficiency = baseEfficiency * Math.pow(efficiencyDampening, windSpeed)
                     polarData(windSpeed)(windDirection) = (1.9438 * (windSpeed  - (windSpeed * windwardCoefficientA * Math.abs(Math.cos(Math.toRadians(windDirection))))) * efficiency).toFloat

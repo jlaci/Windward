@@ -3,7 +3,7 @@ package windward.simulation.units
 /**
  * Created by jlaci on 2015. 09. 29..
  */
-class SimUnit (val value : Float) extends AnyVal {
+class SimUnit (val value : Double) extends AnyVal {
 
     def ==(x : scala.Byte) : Boolean = {
         value == x;
@@ -21,12 +21,12 @@ class SimUnit (val value : Float) extends AnyVal {
         new CellUnit((value / SimulationUnits.tileSizeInSimUnits).toInt)
     }
 
-    def toMeters() : Float = {
+    def toMeters() : Double = {
         value * SimulationUnits.simUnitInMeters
     }
 
     def toFloat() : Float = {
-        value
+        value.toFloat
     }
 
     def toInt() : Int = {

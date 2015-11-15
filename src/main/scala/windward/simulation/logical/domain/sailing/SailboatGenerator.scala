@@ -3,7 +3,7 @@ package windward.simulation.logical.domain.sailing
 import windward.simulation.logical.domain.sailing.polar.PolarCurveUtility
 import windward.simulation.logical.domain.sailing.sail.{Sail, SailType}
 import windward.simulation.logical.domain.sailing.strategy.actions.Turn
-import windward.simulation.logical.domain.sailing.strategy.{DirectLineStrategy, SailingAction}
+import windward.simulation.logical.domain.sailing.strategy.{ZStrategyParameters, ZStrategy, DirectLineStrategy, SailingAction}
 import windward.simulation.units.{Coordinate, SimUnit, SimulationUnits}
 
 /**
@@ -11,7 +11,7 @@ import windward.simulation.units.{Coordinate, SimUnit, SimulationUnits}
  */
 object SailboatGenerator {
 
-    def getTestSailboat(startPosX : SimUnit, startPosY : SimUnit, startHeading : Int, goalX : SimUnit, goalY : SimUnit) : Sailboat = {
+    def getDirectLineSailboat(startPosX : SimUnit, startPosY : SimUnit, startHeading : Int, goalX : SimUnit, goalY : SimUnit) : Sailboat = {
         val sails = new Array[Sail](1)
         sails(0) = new Sail(SailType.Standard, PolarCurveUtility.createTestPolarCurve());
 
@@ -23,4 +23,21 @@ object SailboatGenerator {
 
         new Sailboat(startPosX, startPosY, params, startHeading, 0 , 0, strategy, possibleActions, ongoingActions)
     }
+
+    def getZStrategySailboat(startPosX : SimUnit, startPosY : SimUnit, startHeading : Int, goalX : SimUnit, goalY : SimUnit) : Sailboat = {
+        val sails = new Array[Sail](1)
+        sails(0) = new Sail(SailType.Standard, PolarCurveUtility.createTestPolarCurve());
+
+        val sailboatParams = new SailboatParams(SimulationUnits.simUnitFromMeter(10), SimulationUnits.simUnitFromMeter(14), 30, 3000, sails);
+        val strategyParams = new ZStrategyParameters(90, 0.75, 0.3)
+
+        val strategy = new ZStrategy(Coordinate.SimCoords(goalX, goalY), strategyParams);
+        val possibleActions = List(new Turn(sailboatParams.turnSpeed));
+        val ongoingActions = List.empty[(SailingAction, Int)];
+
+        new Sailboat(startPosX, startPosY, sailboatParams, startHeading, 0 , 0, strategy, possibleActions, ongoingActions)
+    }
+
+
+
 }
