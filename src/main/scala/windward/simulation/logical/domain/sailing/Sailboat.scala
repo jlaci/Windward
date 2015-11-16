@@ -1,7 +1,7 @@
 package windward.simulation.logical.domain.sailing
 
 import breeze.linalg.DenseVector
-import windward.simulation.logical.domain.sailing.strategy.SailingAction
+import windward.simulation.logical.domain.sailing.strategy.{ZStrategy, SailingAction}
 import windward.simulation.logical.{Actor, Strategy}
 import windward.simulation.physical.PhysicsUtility
 import windward.simulation.physical.effects.CellEffect
@@ -43,12 +43,13 @@ class Sailboat(val posX: SimUnit,
 
     def calculateNewState(sailboat: Sailboat, world: World) : Sailboat = {
         var result = sailboat
+        val newStrategy = strategy.copyStrategy()
 
-        for(action <- strategy.step(result, world)) {
+        for(action <- newStrategy.step(result, world)) {
             result = action.applyOn(result)
         }
 
-        result
+        Sailboat.copySailboatWith(result, newStrategy)
     }
 
     def getHeadingVector() : DenseVector[Double] = {
@@ -157,4 +158,10 @@ class Sailboat(val posX: SimUnit,
         Math.sqrt(appWindVector.data(0) * appWindVector.data(0) + appWindVector.data(1) * appWindVector.data(1))
     }
 
+}
+
+object Sailboat {
+    def copySailboatWith(sailboat : Sailboat, strategy : Strategy[Sailboat, SailingAction]) : Sailboat = {
+        new Sailboat(sailboat.posX, sailboat.posY, sailboat.params, sailboat.heading, sailboat.speed, sailboat.activeSail, strategy, sailboat.possibleActions, sailboat.ongoingActions)
+    }
 }

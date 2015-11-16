@@ -1,6 +1,7 @@
 package windward.simulation.logical.domain.sailing.strategy
 
 import breeze.linalg.{DenseVector}
+import windward.simulation.logical.Strategy
 import windward.simulation.logical.domain.sailing.Sailboat
 import windward.simulation.logical.domain.sailing.strategy.actions.Turn
 import windward.simulation.logical.strategy.TravelStrategy
@@ -60,4 +61,7 @@ class DirectLineStrategy(goalPosition : Coordinate[SimUnit]) extends TravelStrat
         Math.toDegrees(angle)
     }
 
+    override def copyStrategy(): Strategy[Sailboat, SailingAction] = {
+        this
+    }
 }

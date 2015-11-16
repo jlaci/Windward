@@ -12,7 +12,7 @@ object PolarCurveUtility {
         createSemiRealisticPolarCurve()
     }
 
-    def loadPolarCurveForFile(filePath : String) : PolarCurve = {
+    def loadPolarCurveFromFile(filePath : String) : PolarCurve = {
         //Init the polar data array
         val polarData = new Array[Array[Float]](SimulationUnits.maxWindSpeed.toInt)
         for (windSpeed <- 0 until SimulationUnits.maxWindSpeed.toInt) {
@@ -30,9 +30,9 @@ object PolarCurveUtility {
     }
 
     def createSemiRealisticPolarCurve() : PolarCurve = {
-        val windwardCoefficientA = 0.3f
+        val windwardCoefficientA = 0.1f
         val baseEfficiency = 0.7f
-        val efficiencyDampening = 0.95f;
+        val efficiencyDampening = 0.94f;
 
         val polarData = new Array[Array[Float]](SimulationUnits.maxWindSpeed.toInt)
 

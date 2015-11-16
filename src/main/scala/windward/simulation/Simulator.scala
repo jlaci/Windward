@@ -1,16 +1,14 @@
 package windward.simulation
 
 import windward.simulation.logical.LogicalSimulator
-import windward.simulation.logical.domain.sailing.{Sailboat, SailboatGenerator}
+import windward.simulation.logical.domain.sailing.Sailboat
+import windward.simulation.physical.PhysicalSimulator
 import windward.simulation.physical.world.World
-import windward.simulation.physical.{PhysicalSimulator, WorldBuilder}
-import windward.simulation.units.{SimUnit, SimulationUnits}
-
 
 /**
- * Created by jlaci on 2015. 09. 25..
+ * Created by jlaci on 2015. 11. 16..
  */
-object Simulator {
+class Simulator {
 
     var simTime: Int = 0;
 
@@ -18,33 +16,37 @@ object Simulator {
     var sailboats: Array[Array[Sailboat]] = null
     var simulationParameters : SimulationParameters = null
 
-    def init(parameters: SimulationParameters): Unit = {
-        simulationParameters = parameters
-        worldState = new Array[World](parameters.endTime + 1)
-        worldState(0) = WorldBuilder.createWorldWitGradientWind(parameters.worldWidth, parameters.worldHeight, 315, 30);
-        //worldState(0) = WorldBuilder.createWorldWithUniformWind(parameters.worldWidth, parameters.worldHeight, 315, 20);
-        //worldState(0) = WorldBuilder.createWorldWithRandomWind(parameters.worldWidth, parameters.worldHeight);
+    def run(parameters: SimulationParameters, startingSailboats : List[Sailboat], startingWorldState : World) : (Array[World],Array[Array[Sailboat]]) = {
+        init(parameters, startingSailboats, startingWorldState)
+        start()
+        val result = (worldState, sailboats)
+        worldState = null
+        sailboats = null
+        simulationParameters = null
+        simTime = 0
+        result
+    }
 
+    def init(parameters: SimulationParameters, startingSailboats : List[Sailboat], startingWorldState : World): Unit = {
+        simulationParameters = parameters
+
+        worldState = new Array[World](parameters.endTime + 1)
+        worldState(0) = startingWorldState
 
         sailboats = new Array[Array[Sailboat]](parameters.endTime + 1)
-        sailboats(0) = new Array[Sailboat](1);
-        //sailboats(0)(0) = SailboatGenerator.getDirectLineSailboat(new SimUnit(512), new SimUnit(960), 45, new SimUnit(1021), new SimUnit(509))
-
-        sailboats(0)(0) = SailboatGenerator.getZStrategySailboat(new SimUnit(512), new SimUnit(960), 45, new SimUnit(512), new SimUnit(0))
-
+        sailboats(0) = startingSailboats.toArray
     }
 
     def start(): Unit = {
-        println("Starting simulation")
         while (simTime < simulationParameters.endTime) {
             step()
-            simTime += 1;
+            simTime += 1
         }
     }
 
     def step(): Unit = {
-        println("Simulation step " + simTime + " time: " + (simTime * SimulationUnits.timeStepInMilliseconds / 1000) + "s")
-        worldState(simTime + 1) = PhysicalSimulator.step(worldState(simTime));
-        sailboats(simTime + 1) = LogicalSimulator.step(worldState(simTime), sailboats(simTime));
+        worldState(simTime + 1) = PhysicalSimulator.step(worldState(simTime))
+        sailboats(simTime + 1) = LogicalSimulator.step(worldState(simTime), sailboats(simTime))
     }
+
 }

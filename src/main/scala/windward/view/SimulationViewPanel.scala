@@ -3,9 +3,9 @@ package windward.view
 import java.awt._
 import java.awt.geom.GeneralPath
 
-import windward.simulation.Simulator
+import windward.simulation.GlobalSimulator
 import windward.simulation.logical.domain.sailing.Sailboat
-import windward.simulation.units.{SimUnit, SimulationUnits}
+import windward.simulation.units.SimulationUnits
 
 import scala.collection.mutable
 import scala.swing.{Graphics2D, Panel}
@@ -54,7 +54,7 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
 
     def drawSailboatPaths(g : Graphics2D) : Unit = {
         //TODO: multiple sailboats
-        val positions = for (timeStep <- 0 to viewSimStep) yield (Simulator.sailboats(timeStep)(0).posX, Simulator.sailboats(timeStep)(0).posY)
+        val positions = for (timeStep <- 0 to viewSimStep) yield (GlobalSimulator.simulator.sailboats(timeStep)(0).posX, GlobalSimulator.simulator.sailboats(timeStep)(0).posY)
 
         if (!positions.isEmpty) {
             val minDimension = Math.min(g.getClipBounds.width.toFloat, g.getClipBounds.height.toFloat)
@@ -191,19 +191,19 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
         val result: Array[Array[(Color, Int)]] = new Array[Array[(Color, Int)]](size)
 
         var viewX = x
-        if (Simulator.worldState(viewSimStep).width.toCellUnit().toInt < (x + size)) {
-            viewX = Math.max(Simulator.worldState(viewSimStep).width.toCellUnit().toInt - size, 0)
+        if (GlobalSimulator.simulator.worldState(viewSimStep).width.toCellUnit().toInt < (x + size)) {
+            viewX = Math.max(GlobalSimulator.simulator.worldState(viewSimStep).width.toCellUnit().toInt - size, 0)
         }
 
         var viewY = y
-        if (Simulator.worldState(viewSimStep).height.toCellUnit().toInt < (y + size)) {
-            viewY = Math.max(Simulator.worldState(viewSimStep).height.toCellUnit().toInt - size, 0)
+        if (GlobalSimulator.simulator.worldState(viewSimStep).height.toCellUnit().toInt < (y + size)) {
+            viewY = Math.max(GlobalSimulator.simulator.worldState(viewSimStep).height.toCellUnit().toInt - size, 0)
         }
 
         for (rowIndex <- viewX until (viewX + size)) {
             result(rowIndex - viewX) = new Array[(Color, Int)](size)
             for (columnIndex <- viewY until (viewY + size)) {
-                val cell = Simulator.worldState(viewSimStep).cells(rowIndex)(columnIndex)
+                val cell = GlobalSimulator.simulator.worldState(viewSimStep).cells(rowIndex)(columnIndex)
                 result(rowIndex - viewX)(columnIndex - viewY) = (calculateColor(cell.windSpeed), cell.windDirection)
             }
         }
@@ -214,7 +214,7 @@ class SimulationViewPanel(var x: Int, var y: Int, var viewSize: Int) extends Pan
     private def getSailboats(x: Int, y: Int, size: Int) : Array[Sailboat] = {
         val result = mutable.MutableList[Sailboat]()
 
-        for(sailboat <- Simulator.sailboats(viewSimStep)) {
+        for(sailboat <- GlobalSimulator.simulator.sailboats(viewSimStep)) {
             val sailboatX = sailboat.position.x.toCellUnit().toInt()
             val sailboatY = sailboat.position.y.toCellUnit().toInt()
 

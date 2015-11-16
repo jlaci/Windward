@@ -8,4 +8,6 @@ import windward.simulation.physical.world.World
 abstract class Strategy[actorType <: Actor, actionType <: Action[actorType]] {
 
     def step(actor : actorType, world: World) : List[actionType]
+
+    def copyStrategy() : Strategy[actorType, actionType]
 }

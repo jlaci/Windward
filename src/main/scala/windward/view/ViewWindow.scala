@@ -2,11 +2,10 @@ package windward.view
 
 import java.awt.event.{FocusEvent, FocusListener}
 import java.text.DecimalFormat
-import javax.swing.SpringLayout.Constraints
-import javax.swing.{JLabel, BorderFactory, JFrame}
+import javax.swing.{BorderFactory, JFrame}
 
-import windward.simulation.Simulator
-import windward.simulation.physical.{PhysicsUtility, PhysicalSimulator}
+import windward.simulation.GlobalSimulator
+import windward.simulation.physical.PhysicsUtility
 
 import scala.swing.GridBagPanel.Fill
 import scala.swing._
@@ -34,22 +33,22 @@ class ViewWindow extends MainFrame {
     var appWindDirTF : TextField = null
 
     def getSailboat() = {
-        Simulator.sailboats(simViewPanel.viewSimStep)(0)
+        GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0)
     }
 
     def getTrueWindSpeed = {
         val sailboat = getSailboat()
-        sailboat.getAverageWindSpeed(sailboat.getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep)))
+        sailboat.getAverageWindSpeed(sailboat.getEffectingCells(GlobalSimulator.simulator.worldState(simViewPanel.viewSimStep)))
     }
 
     def getTrueWindDir = {
         val sailboat = getSailboat()
-        sailboat.getRelativeWindDirection(sailboat.getAverageWindDirection(sailboat.getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep))))
+        sailboat.getRelativeWindDirection(sailboat.getAverageWindDirection(sailboat.getEffectingCells(GlobalSimulator.simulator.worldState(simViewPanel.viewSimStep))))
     }
 
     def getAppWindSpeed = {
         val sailboat = getSailboat()
-        sailboat.getApparentWindSpeed(sailboat.getAverageWindDirection(sailboat.getEffectingCells(Simulator.worldState(simViewPanel.viewSimStep))), getTrueWindSpeed)
+        sailboat.getApparentWindSpeed(sailboat.getAverageWindDirection(sailboat.getEffectingCells(GlobalSimulator.simulator.worldState(simViewPanel.viewSimStep))), getTrueWindSpeed)
     }
 
     def getAppWindDir = {
@@ -98,7 +97,7 @@ class ViewWindow extends MainFrame {
                 cs.weighty = 0.1
 
                 //The actual view panel
-                simViewPanel = new SimulationViewPanel(Simulator.simulationParameters.worldWidth.toCellUnit().toInt() / 2 - 16, Simulator.simulationParameters.worldHeight.toCellUnit().toInt() / 2 - 16, 32) {
+                simViewPanel = new SimulationViewPanel(GlobalSimulator.simulator.simulationParameters.worldWidth.toCellUnit().toInt() / 2 - 16, GlobalSimulator.simulator.simulationParameters.worldHeight.toCellUnit().toInt() / 2 - 16, 32) {
                     preferredSize = new swing.Dimension(750, 750)
                 }
                 cs.anchor = GridBagPanel.Anchor.Center
@@ -110,17 +109,17 @@ class ViewWindow extends MainFrame {
 
                     val timeStepTF = new TextField() {
                         columns = 10
-                        text = simViewPanel.viewSimStep + " / " + Simulator.simulationParameters.endTime
+                        text = simViewPanel.viewSimStep + " / " + GlobalSimulator.simulator.simulationParameters.endTime
                     }
 
                     def simStepChanged = {
                         simViewPanel.repaint()
-                        timeStepTF.text = simViewPanel.viewSimStep + " / " + Simulator.simulationParameters.endTime
-                        boatXCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
-                        boatYCoordTF.text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
-                        boatSpeedTF.text = formatter.format(PhysicsUtility.knotsFromMeterPerSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
-                        boatHeadingTF.text = formatter.format(Simulator.sailboats(simViewPanel.viewSimStep)(0).heading)
-                        boatSailTF.text = if(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail == -1) "none" else Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
+                        timeStepTF.text = simViewPanel.viewSimStep + " / " + GlobalSimulator.simulator.simulationParameters.endTime
+                        boatXCoordTF.text = GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
+                        boatYCoordTF.text = GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
+                        boatSpeedTF.text = formatter.format(PhysicsUtility.knotsFromMeterPerSecond(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
+                        boatHeadingTF.text = formatter.format(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).heading)
+                        boatSailTF.text = if(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail == -1) "none" else GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
                         trueWindSpeedTF.text = formatter.format(getTrueWindSpeed) + " m/s"
                         trueWindDirTF.text = formatter.format(getTrueWindDir)
                         appWindSpeedTF.text = formatter.format(getAppWindSpeed) + " m/s"
@@ -131,11 +130,11 @@ class ViewWindow extends MainFrame {
                         text = "Center"
                         reactions += {
                             case ButtonClicked(_) => {
-                                val maxX = Simulator.simulationParameters.worldWidth.toCellUnit().value - simViewPanel.viewSize
-                                val maxY = Simulator.simulationParameters.worldHeight.toCellUnit().value - simViewPanel.viewSize
+                                val maxX = GlobalSimulator.simulator.simulationParameters.worldWidth.toCellUnit().value - simViewPanel.viewSize
+                                val maxY = GlobalSimulator.simulator.simulationParameters.worldHeight.toCellUnit().value - simViewPanel.viewSize
 
-                                simViewPanel.x = Math.min(maxX, Math.max(Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toCellUnit.value - simViewPanel.viewSize/2,0))
-                                simViewPanel.y = Math.min(maxY, Math.max(Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toCellUnit.value - simViewPanel.viewSize/2,0))
+                                simViewPanel.x = Math.min(maxX, Math.max(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toCellUnit.value - simViewPanel.viewSize/2,0))
+                                simViewPanel.y = Math.min(maxY, Math.max(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toCellUnit.value - simViewPanel.viewSize/2,0))
                                 simStepChanged
                                 viewDataChanged
                             };
@@ -172,7 +171,7 @@ class ViewWindow extends MainFrame {
                         text = ">"
                         reactions += {
                             case ButtonClicked(_) => {
-                                if (simViewPanel.viewSimStep < Simulator.simulationParameters.endTime) {
+                                if (simViewPanel.viewSimStep < GlobalSimulator.simulator.simulationParameters.endTime) {
                                     simViewPanel.viewSimStep += 1
                                     simStepChanged
                                 }
@@ -182,8 +181,8 @@ class ViewWindow extends MainFrame {
                         text = ">>"
                         reactions += {
                             case ButtonClicked(_) => {
-                                if (simViewPanel.viewSimStep < Simulator.simulationParameters.endTime) {
-                                    simViewPanel.viewSimStep = Math.min(simViewPanel.viewSimStep + 10, Simulator.simulationParameters.endTime)
+                                if (simViewPanel.viewSimStep < GlobalSimulator.simulator.simulationParameters.endTime) {
+                                    simViewPanel.viewSimStep = Math.min(simViewPanel.viewSimStep + 10, GlobalSimulator.simulator.simulationParameters.endTime)
                                     simStepChanged
                                 }
                             };
@@ -192,7 +191,7 @@ class ViewWindow extends MainFrame {
                         text = "End"
                         reactions += {
                             case ButtonClicked(_) => {
-                                simViewPanel.viewSimStep = Simulator.simulationParameters.endTime;
+                                simViewPanel.viewSimStep = GlobalSimulator.simulator.simulationParameters.endTime;
                                 simStepChanged
                             };
                         }
@@ -294,7 +293,7 @@ class ViewWindow extends MainFrame {
 
                     boatXCoordTF = new TextField() {
                         columns = 5
-                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
+                        text = GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).posX.toFloat().toString
                     }
                     bdpc.gridx = 1
                     layout(boatXCoordTF) = bdpc
@@ -309,7 +308,7 @@ class ViewWindow extends MainFrame {
 
                     boatYCoordTF = new TextField() {
                         columns = 5
-                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
+                        text = GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).posY.toFloat().toString
                     }
                     bdpc.gridx = 1
                     layout(boatYCoordTF) = bdpc
@@ -325,7 +324,7 @@ class ViewWindow extends MainFrame {
 
                     boatSpeedTF = new TextField() {
                         columns = 5
-                        text = formatter.format(PhysicsUtility.knotsFromMeterPerSecond(Simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
+                        text = formatter.format(PhysicsUtility.knotsFromMeterPerSecond(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).speed)) + " kts"
                     }
                     bdpc.gridx = 1
                     layout(boatSpeedTF) = bdpc
@@ -340,7 +339,7 @@ class ViewWindow extends MainFrame {
 
                     boatHeadingTF = new TextField() {
                         columns = 5
-                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).heading.toString
+                        text = GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).heading.toString
                     }
                     bdpc.gridx = 1
                     layout(boatHeadingTF) = bdpc
@@ -355,7 +354,7 @@ class ViewWindow extends MainFrame {
 
                     boatSailTF = new TextField() {
                         columns = 5
-                        text = Simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(Simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
+                        text = GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).params.sails(GlobalSimulator.simulator.sailboats(simViewPanel.viewSimStep)(0).activeSail).sailType.toString
                     }
                     bdpc.gridx = 1
                     layout(boatSailTF) = bdpc
@@ -453,35 +452,35 @@ class ViewWindow extends MainFrame {
             case KeyPressed(_, Key.Up, _, _) => {
                 if (simViewPanel.y > 0) {
                     simViewPanel.y -= 1
+                    simViewPanel.repaint()
                     viewDataChanged
-                    repaint()
                 }
             }
             case KeyPressed(_, Key.Left, _, _) => {
                 if(simViewPanel.x > 0) {
                     simViewPanel.x -= 1
+                    simViewPanel.repaint()
                     viewDataChanged
-                    repaint()
                 }
             }
             case KeyPressed(_, Key.Down, _, _) => {
-                if(simViewPanel.y < Simulator.simulationParameters.worldHeight.toCellUnit().toInt() - simViewPanel.viewSize) {
+                if(simViewPanel.y < GlobalSimulator.simulator.simulationParameters.worldHeight.toCellUnit().toInt() - simViewPanel.viewSize) {
                     simViewPanel.y += 1
+                    simViewPanel.repaint()
                     viewDataChanged
-                    repaint()
                 }
             }
             case KeyPressed(_, Key.Right, _, _) => {
-                if(simViewPanel.x < Simulator.simulationParameters.worldWidth.toCellUnit().toInt() - simViewPanel.viewSize) {
+                if(simViewPanel.x < GlobalSimulator.simulator.simulationParameters.worldWidth.toCellUnit().toInt() - simViewPanel.viewSize) {
                     simViewPanel.x += 1
+                    simViewPanel.repaint()
                     viewDataChanged
-                    repaint()
                 }
             }
             case KeyPressed(_, Key.Subtract, _, _) => {
-                if(simViewPanel.viewSize < Math.min(64, Math.max(Simulator.simulationParameters.worldWidth.toCellUnit().toInt(), Simulator.simulationParameters.worldHeight.toCellUnit().toInt()))) {
-                    val maxX = Simulator.simulationParameters.worldWidth.toCellUnit().value - simViewPanel.viewSize
-                    val maxY = Simulator.simulationParameters.worldHeight.toCellUnit().value - simViewPanel.viewSize
+                if(simViewPanel.viewSize < Math.min(64, Math.max(GlobalSimulator.simulator.simulationParameters.worldWidth.toCellUnit().toInt(), GlobalSimulator.simulator.simulationParameters.worldHeight.toCellUnit().toInt()))) {
+                    val maxX = GlobalSimulator.simulator.simulationParameters.worldWidth.toCellUnit().value - simViewPanel.viewSize
+                    val maxY = GlobalSimulator.simulator.simulationParameters.worldHeight.toCellUnit().value - simViewPanel.viewSize
                     simViewPanel.viewSize += 1
 
                     if(simViewPanel.x > maxX) {
@@ -493,14 +492,14 @@ class ViewWindow extends MainFrame {
                     }
 
                     viewDataChanged
-                    repaint()
+                    simViewPanel.repaint()
                 }
             }
             case KeyPressed(_, Key.Add, _, _) => {
                 if(simViewPanel.viewSize > 1) {
                     simViewPanel.viewSize -= 1
                     viewDataChanged
-                    repaint()
+                    simViewPanel.repaint()
                 }
             }
         }

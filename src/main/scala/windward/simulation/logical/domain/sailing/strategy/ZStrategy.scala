@@ -129,10 +129,20 @@ class ZStrategy(goalPosition : Coordinate[SimUnit], params : ZStrategyParameters
 
         Math.toDegrees(angle)
     }
+
+    override def copyStrategy() : ZStrategy = {
+        val result = new ZStrategy(goalPosition, params)
+        result.state = state
+        result.turn1position = turn1position
+        result.turn2position = turn2position
+        result
+    }
 }
 
 class ZStrategyParameters (val alfa : Double, val l1 : Double, val l2 : Double) {
-
+    override def toString() : String = {
+        "alfa: " + alfa + " l1: " + l1 + " l2: " + l2
+    }
 }
 
 object ZStrategyState extends Enumeration {
