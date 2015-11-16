@@ -29,7 +29,7 @@ object SailboatGenerator {
         sails(0) = new Sail(SailType.Standard, PolarCurveUtility.createTestPolarCurve());
 
         val sailboatParams = new SailboatParams(SimulationUnits.simUnitFromMeter(10), SimulationUnits.simUnitFromMeter(14), 30, 3000, sails);
-        val strategyParams = new ZStrategyParameters(90, 0.75, 0.3)
+        val strategyParams = new ZStrategyParameters(60, 2/3.0, 1/3.0)
 
         val strategy = new ZStrategy(Coordinate.SimCoords(goalX, goalY), strategyParams);
         val possibleActions = List(new Turn(sailboatParams.turnSpeed));

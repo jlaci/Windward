@@ -19,11 +19,11 @@ object ZStrategySBSOptimizer {
     val alfaMax = 180
 
     //Search parameters
-    val beams = 100
-    val maxStep = 100
-    val simSteps = 250
+    val beams = 10
+    val maxStep = 200
+    val simSteps = 500
 
-    def optimizeZStrategy(startingSailboat : Sailboat, startingState : World, goalPosition : Coordinate[SimUnit]): Unit = {
+    def optimizeZStrategy(startingSailboat : Sailboat, startingState : World, goalPosition : Coordinate[SimUnit]): ZStrategyParameters = {
         val simParams = new SimulationParameters(simSteps, startingState.width, startingState.height)
 
         var currentWinnerScore = simSteps.toDouble
@@ -34,6 +34,7 @@ object ZStrategySBSOptimizer {
             println("Starting beam " + beamNumber)
             val beam = new StochasticBeam(new Simulator(), simParams, searchParams)
             beam.run()
+            println("Beam " + beamNumber + " finished with score " + beam.winningScore)
 
             if(beam.winningScore < currentWinnerScore) {
                 currentWinnerScore = beam.winningScore
@@ -42,12 +43,7 @@ object ZStrategySBSOptimizer {
         }
 
         println("Result score: " + currentWinnerScore + " for " + currentWinner)
-
-        val resultSailboat = Sailboat.copySailboatWith(startingSailboat, new ZStrategy(goalPosition, currentWinner))
-        GlobalSimulator.init(simParams, List(resultSailboat), startingState)
-        val window: ViewWindow = new ViewWindow()
-        window.visible = true
-        GlobalSimulator.start()
+        currentWinner
     }
 
 
